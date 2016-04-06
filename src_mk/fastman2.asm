@@ -32,16 +32,22 @@
 ;		7 -
 ;
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++
+	;%%%%%% LCD
 	LCD_E 	EQU P3.0
-
 	LCD_RW 	EQU P3.1	; -- but not used directy in code
 	LCD_CS	EQU P3.3	; -- but not used directy in code
 	LCD_RES	EQU P3.4
 	LCD_A0 	EQU P3.5	; -- but not used directy in code
-	
 	INT_BTN EQU P3.2	; in interrupt
+	;%%%%%% RAM
+	;RAM_CE	EQU P3.3	;P3.6
+	;RAM_OE	EQU P3.7	;P3.3
+	;RAM_WE	EQU P3.6	;P3.7
 	
-
+	RAM_CE	EQU P3.3	;P3.6
+	RAM_OE	EQU P3.7	;P3.3
+	RAM_WE	EQU P3.6	;P3.7
+	
 ;;;;;;;;;;;;;;;;;;;;;
 ;; PROG help
 ;;
@@ -57,7 +63,7 @@
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; constants
 	FIRSTADDLEFT		EQU	0x13
-	FIRSTADDRIGHT		EQU	0x00
+	FIRSTADDRIGHT		EQU	0x13	;0x00 0x13 !!! WTF !!!
 	MANRUNFRAMES		EQU 0x03
 	
 	; RAM
@@ -132,9 +138,12 @@ INITBUTTONINT:
 MAIN:
 	ACALL DISINTS
 	ACALL LCDINIT
+	ACALL RAMINIT
 	ACALL RESETGAME
 	ACALL INITBUTTONINT
-	ACALL MAINLOOP
+	;ACALL MAINLOOP
+	ACALL LOOPRAM
+
 	
 
 RESETGAME:
@@ -175,13 +184,117 @@ NEWGAME:
 ;
 MAINLOOP:
 	ACALL LCDCLEAR
-	ACALL DRAW_TABLE ; static table
+	;ACALL DRAW_TABLE ; static table
 
 	DONO:
 		ACALL LCDDRAW
-	
+		
+		
 		JMP DONO
 	RET
+	
+	
+	
+	
+	
+	
+
+; тестирование RAM
+LOOPRAM:
+	ACALL LCDCLEAR
+
+	
+	; write to RAM
+	;MOV DPH, #0x01
+	;MOV DPL, #0x00
+	;MOV A, #0xAA
+	;MOVX @DPTR, A
+	;-
+	MOV R0, #0x01
+	MOV R1, #0x00
+	MOV A, #0xFF
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x01
+	MOV A, #0xAA
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x02
+	MOV A, #0x55
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x03
+	MOV A, #0xAA
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x04
+	MOV A, #0x55
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x05
+	MOV A, #0xAA
+	ACALL RAMWRITEDO
+	;-
+	MOV R1, #0x06
+	MOV A, #0xFF
+	ACALL RAMWRITEDO
+	
+	
+	_doram2:
+		; reset addr
+		MOV R0, #0xE2
+		ACALL LCDWRITE_CODE_L
+		MOV R0, #0xB9 ; page 1
+		ACALL LCDWRITE_CODE_L
+		MOV R0, #FIRSTADDLEFT
+		ACALL LCDWRITE_CODE_L
+		
+		; draw preset
+		MOV R0, #0xFF
+		ACALL LCDWRITE_DATA_L
+		MOV R0, #0xAA
+		ACALL LCDWRITE_DATA_L
+		MOV R0, #0xFF
+		ACALL LCDWRITE_DATA_L
+		MOV R0, #0x81
+		ACALL LCDWRITE_DATA_L
+		MOV R0, #0x00
+		ACALL LCDWRITE_DATA_L
+			
+			
+		MOV R4, #0x00
+		MOV R3, #7	; draw cols
+		_dr_ram_12:
+		
+			MOV A, #0xFF
+			
+			; read from RAM
+			;MOV A, #0x00
+			;MOV DPTR, #0x00
+			;MOV DPH, #0x01
+			;MOVX A, @DPTR
+			;-
+			MOV R0, #0x01
+			MOV A, R4
+			MOV R1, A ;#0x00
+			ACALL RAMREADDO
+			; draw
+			MOV R0, A
+			ACALL LCDWRITE_DATA_L
+		
+			INC R4
+			DJNZ R3, _dr_ram_12
+
+		
+	_notdoram2:
+		;JMP _doram2
+		JMP _notdoram2
+		
+	RET
+
+	
+	
+	
 	
 	
 	
@@ -206,6 +319,118 @@ INT_BUTTON:
 	POP ACC
 	;POP PSW
 	RET
+	
+	
+	
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   	   RAM DRIVER		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;;; сюда вынесено для удобства чтения ;;;;
+	;%%%%%% RAM (для МК кто работает с external памятью)
+	;RAM_OE	EQU P3.7	;P3.3
+	;RAM_WE	EQU P3.6	;P3.7
+	;%%%%%% RAM (для низкого уровня)
+	;RAM_CE	EQU P3.6
+	;RAM_OE	EQU P3.3
+	;RAM_WE	EQU P3.7
+	
+RAMINIT:
+	; если используется низкий уровень
+	SETB RAM_CE	; standby RAM
+	; AUXR.1 = 1
+	SETB 08FH
+	RET
+; остался как пример (обертка, лучше использовать с постфиксом J)
+; т.к. МК подобные AT89C51RC при правильном подключении (шина данных, шина адресации и RE=>WR, OE=>RD, CE=>Ground) 
+; работают сами через MOVX
+RAMWRITE:	; (R0 addr1 (0100H to FFFFH), R1 addr2, A data) out void
+	; An access to external data memory locations higher than FFH (i.e. 0100H to FFFFH) will be performed
+	; with the MOVX DPTR instructions in the same way as in the standard 80C51
+	;MOV DPTR, #0x00
+	MOV DPH, R0		; начиная с 0100H to FFFFH
+	MOV DPL, R1
+	MOVX @DPTR, A		; write
+	RET
+RAMWRITEJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2, A data) out void
+	MOVX @DPTR, A		; write
+	RET
+; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
+RAMWRITEN:	; (R0 addr1, R1 addr2, A data) out void
+; TODO
+	SETB RAM_WE
+	SETB RAM_CE
+	
+	MOV P1, A
+	MOV P0, R0
+	MOV P2, R1
+	
+	CLR RAM_CE
+	CLR RAM_WE
+
+	NOP
+	
+	;CLR RAM_OE
+	;CLR RAM_WE
+	;CLR RAM_CE
+	SETB RAM_WE
+	SETB RAM_CE
+	
+	RET
+; использовать как обертку для отладки (в релизе лучше использовать необходимую)
+RAMWRITEDO:
+	;ACALL RAMWRITE
+	ACALL RAMWRITEN
+	RET
+	
+; остался как пример (обертка, лучше использовать с постфиксом J)
+; т.к. МК подобные AT89C51RC при правильном подключении (шина данных, шина адресации и RE=>WR, OE=>RD, CE=>Ground) 
+; работают сами через MOVX
+RAMREAD:	; (R0 addr1 (0100H to FFFFH), R1 addr2) out (A data)
+	; An access to external data memory locations higher than FFH (i.e. 0100H to FFFFH) will be performed
+	; with the MOVX DPTR instructions in the same way as in the standard 80C51
+	;MOV DPTR, #0x00
+	MOV DPH, R0 ;#0x01	; начиная с 0100H to FFFFH
+	MOV DPL, R1 ;#0x00
+	MOVX A, @DPTR
+	RET
+RAMREADJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2) out (A data)
+	MOVX A, @DPTR
+	RET
+; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
+RAMREADN:	; (R0 addr1, R1 addr2) out (A data)
+; TODO
+	SETB RAM_WE
+	
+	SETB RAM_CE
+	SETB RAM_OE
+	
+	MOV P0, R0
+	MOV P2, R1
+	MOV P1, #0x00
+	
+	CLR RAM_CE
+	CLR RAM_OE
+	
+	MOV A, P1
+	
+	SETB RAM_CE
+	SETB RAM_OE
+	
+	RET
+; использовать как обертку для отладки (в релизе лучше использовать необходимую)
+RAMREADDO:
+	;ACALL RAMREAD
+	ACALL RAMREADN
+	RET
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   end of RAM DRIVER	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	
+	
 	
 	
 	
@@ -349,7 +574,7 @@ LCDINIT:
 	; ADC select
 	MOV R0, #0xA1
 	ACALL LCDWRITE_CODE_L
-	MOV R0, #0xA0			; !!!!!!!!!!1
+	;MOV R0, #0xA0			; !!!!!!!!!! comment for TEST on Proteus !!!!!!!!!!
 	ACALL LCDWRITE_CODE_R
 	; display on
 	MOV R0, #0xAF
@@ -362,22 +587,14 @@ LCDINIT:
 ; Подача данных/команды в дисплей
 ; ----------------------
 LCDWRITE:  ; R0 = data byte, R1 = cmd
-	; set E,RW,A0,CS
-	; without fix RES
 	MOV P3, R1
-	;s_mtData(b)
 	MOV P1, R0
-	;s_delayNs(40.0)	#>40
-	MOV A, #40					; !!!!!!!! TEST !!!!!!
+	MOV A, #40
 	ACALL DELAYNS
-	;s_mtE(0)
 	CLR LCD_E
-	;s_delayNs(160.0)	#>160
 	MOV A, #160
 	ACALL DELAYNS
-	;s_mtE(1)
 	SETB LCD_E
-	;s_delayNs(200.0 - 40.0 - 160.0) #2000.0 - 40.0 - 160.0
 	;MOV A, #1
 	;ACALL DELAYNS
 	RET
@@ -441,9 +658,7 @@ LCDCLEAR:
 	ACALL STEPEND
 	RET
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   end of LCD DRIVER	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	
@@ -920,7 +1135,7 @@ DRAW_GAMEOVER:
 	ACALL LCDWRITE_CODE_L
 	; draw
 	; левую часть букв
-	MOV R3, #30	; space
+	MOV R3, #29	; space
 	_dr_gmo_f31:
 		MOV R0, #0x00
 		ACALL LCDWRITE_DATA_L
@@ -973,8 +1188,8 @@ DRAW_GAMEOVER:
 ;#################################################
 
 ; game over text
-DDD_DATA_GMO	EQU 0x3A0
-ORG 0x3A0
+DDD_DATA_GMO	EQU 0x13A0
+ORG 0x13A0
 	DB 0x7E, 0x7E, 0x02, 0x02, 0x7E, 0x7E, 0x00
 	DB 0x7E, 0x7E, 0x42, 0x42, 0x7E, 0x7E, 0x00	
 	DB 0x02, 0x02, 0x7E, 0x7E, 0x02, 0x02, 0x00	
@@ -987,14 +1202,14 @@ ORG 0x3A0
 	DB 0x7E, 0x7E, 0x42, 0x42, 0x7E, 0x7E, 0x00	
 	
 ;; man 
-DDD_DATA_MAN_RUN	EQU 0x3F0
-ORG 0x3F0
+DDD_DATA_MAN_RUN	EQU 0x13F0
+ORG 0x13F0
 	DB 0x00, 0x44, 0x4A, 0x3E, 0x0F, 0x1E, 0x24, 0xC0
 	DB 0x00, 0x20, 0x3E, 0xEF, 0x3E, 0x04, 0x02, 0x00
 	
 DDL_MAN_FRAMES		EQU 0x18	; 24 кадра на анимацию прыжка (собственно и длина прыжка)
-DDD_DATA_MAN_DOWN	EQU 0x400	; нижняя часть по кадрам	(нижний DPL адрес должен быть ближе к 0, чтобы проще складывать адрес в 8 битке)
-ORG 0x400
+DDD_DATA_MAN_DOWN	EQU 0x1400	; нижняя часть по кадрам	(нижний DPL адрес должен быть ближе к 0, чтобы проще складывать адрес в 8 битке)
+ORG 0x1400
 	DB 0x00, 0x04, 0xC2, 0x3C, 0x1F, 0x3C, 0xC2, 0x04
 	DB 0x00, 0x42, 0x22, 0x1E, 0x0F, 0x1E, 0x22, 0x42
 	DB 0x00, 0x04, 0x02, 0x02, 0x01, 0x01, 0x02, 0x04
@@ -1020,8 +1235,8 @@ ORG 0x400
 	DB 0x00, 0x42, 0x22, 0x1E, 0x0F, 0x1E, 0x22, 0x42
 	DB 0x00, 0x04, 0xC2, 0x3C, 0x1F, 0x3C, 0xC2, 0x04
 
-DDD_DATA_MAN_UP	EQU 0x500		; верхняя часть по кадрам (нижний DPL адрес должен быть ближе к 0, чтобы проще складывать адрес в 8 битке)
-ORG 0x500
+DDD_DATA_MAN_UP	EQU 0x1500		; верхняя часть по кадрам (нижний DPL адрес должен быть ближе к 0, чтобы проще складывать адрес в 8 битке)
+ORG 0x1500
 	DB 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	DB 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00
 	DB 0x00, 0x20, 0x20, 0xE0, 0xF8, 0xE0, 0x20, 0x20
@@ -1051,8 +1266,8 @@ ORG 0x500
 ; тут стоит переделать, чтобы хранить ID на объекты, увеличив длину уровня в рамках байта (для скролла)
 ; либо оставить так, если очень важна скорость (итак нету видео буфера в этой версии)
 DDL_OBST_ROWS	EQU 0xF0
-DDD_DATA_OBST	EQU 0x675	; у каждого препятствия должен быть 8 бит всегда установлен на протяжении всего препятствия
-ORG 0x675
+DDD_DATA_OBST	EQU 0x1675	; у каждого препятствия должен быть 8 бит всегда установлен на протяжении всего препятствия
+ORG 0x1675
 	DB 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	DB 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	DB 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -1090,18 +1305,18 @@ ORG 0x675
 	DB 0xF8, 0xF8, 0xFC, 0xFF, 0xFF, 0xFC, 0xF8, 0xF8, 0x00, 0x00
 	
 ;; air
-DDD_DATA_AIR	EQU 0x7A1
-ORG 0x7A1
+DDD_DATA_AIR	EQU 0x17A1
+ORG 0x17A1
 	DB 0x08, 0x1C, 0x36, 0x22, 0x20, 0x20, 0x38, 0x0C
 	DB 0x04, 0x0E, 0x1A, 0x12, 0x10, 0x18, 0x08, 0x08
 ;; ground
-DDD_DATA_GROUND	EQU 0x7B1
-ORG 0x7B1
+DDD_DATA_GROUND	EQU 0x17B1
+ORG 0x17B1
 	DB 0xCF, 0xC9, 0xF9, 0xC9, 0xCF, 0xC9, 0xF9, 0xC9
 	DB 0xCF, 0xC9, 0xF9, 0xC9, 0xCF, 0xC9, 0xF9, 0xC9
 ;; table border (static)
-DDD_DATA_TBLB	EQU 0x7C1
-ORG 0x7C1
+DDD_DATA_TBLB	EQU 0x17C1
+ORG 0x17C1
 	DB 0xFF, 0xFF, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
 	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
 	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
