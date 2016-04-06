@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ZeBOY</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="../Content/styles.css" media="screen" rel="stylesheet">
+	</head>	
+
+
+	<body>
+		<div class="header">ZeBOY</div>
+		<div class="menu">
+			<a href="../help.html">Home</a>
+			<a href="mt12232a.html">LCD Display</a>
+			<a href="at89c2051.html">AT89C2051</a>
+			<a href="lcdmk.html" class="current">LCD and MK</a>
+			<a href="mkflash.html">MK and SRAM</a>
+		</div>
+
+		<div class="content">
+			<h1>Работа с дисплеем через МК</h1>
+			<div class="articlebody"></div>
+			
+			<h2>Цель</h2>
+			<div>
+				<p>Написание программы (ASM) для MK <span class="span_device">AT89C2051</span> для вывода на дисплей <span class="span_device">MT-12232A</span> изображений.</p>
+				<p><span class="span_rpi">RPi</span> используется только как инструмент для прошивки МК. В конечном итоге МК должен сам общаться с дисплеем без посторонней помощи.</p>
+			</div>
+			
+			<h2>Подключение МК к LCD</h2>
+			<div class="articlebody">
+				<p>Схема:</p>
+				<p><a href="../Content/Images/mklcd_2.png" target="_blank"><img class="img_sheme" src="../Content/Images/mklcd_2.png"/></a></p>
+				<p>Напряжение: <span class="span_volt">5V</span>. На схеме может быть указано другое.</p>
+				<p>На схеме указан дисплей <span class="span_device">AGM1232G</span>. Используемый в проекте дисплей <span class="span_device">MT-12232A</span> является аналогом этого.</p>
+				<p>Также стоит обратить внимание, что пин с МК <span class="span_pin">P3.3</span> должен быть подключен к пину дисплея <span class="span_pin">CS</span>.</p>
+				<p>Пин с МК <span class="span_pin">P3.2</span> подключен к внешней кнопке. В данном примере драйвера не задействован.</p>
+			</div>
+			
+			<h2>Простая программа на ASM</h2>
+			<div class="articlebody">
+				<p>Код ASM приложения <span class="span_file">mktolcd.asm</span> (а также бинарника для записи на МК через программатор) на <a href="https://github.com/zelderus/ZeBoy/blob/master/mktolcd.asm" target="_blank">GIT</a>.</p>
+				<p>Программа компилятор с ASM в HEX - <a href="http://www.atmel.com/tools/C51ASM.aspx" target="_blank">скачать</a>.</p>
+				<p>
+					<div>Программа конвертер из HEX в BIN - <a href="http://advantex.ru/joom/content/view/78/69/" target="_blank">скачать</a>.</div>
+					<div>Файл на выводе необходим для программы прошивки от программатора <span class="span_device">PR8051.1</span>
+				</p>
+				<p>
+					<div>Пример программы на Python3 для прошивки:</div>
+					<div class="code_simple">
+						<textarea class="txt_code" style="height:100px;">
+		import pr8051 as mk
+		
+		mk.mkInit()  					# инициализация
+		mk.mkWrite("mktolcd.bin")		# запись
+						</textarea>
+					</div>
+				</p>
+				<p>Данный пример программы (<span class="span_file">mktolcd.asm</span>) является простым для изучения. Выводит статическую картинку на дисплей <span class="span_device">MT-12232A</span>.</p>
+				<p>По сути является минимальным драйвером работы с дисплеем для прошивки и работы с МК <span class="span_device">AT89C2051</span>.</p>
+			</div>
+			
+			<h2>Применение внешних прерываний - подключение</h2>
+			<div class="articlebody">
+				<p>Схема:</p>
+				<p><a href="../Content/Images/mklcd_2.png" target="_blank"><img class="img_sheme" src="../Content/Images/mklcd_2.png"/></a></p>
+				<p>Напряжение: <span class="span_volt">5V</span>. На схеме может быть указано другое.</p>
+				<p>
+					<div>На схеме указан дисплей <span class="span_device">AGM1232G</span>. Используемый в проекте дисплей <span class="span_device">MT-12232A</span> является аналогом этого.</div>
+					<div>Также стоит обратить внимание, что пин с МК <span class="span_pin">P3.3</span> должен быть подключен к пину дисплея <span class="span_pin">CS</span>.</div>
+					<div>Обращаем внимание, что пин с МК <span class="span_pin">P3.2</span> подключен к внешней кнопке. А пин с дисплея <span class="span_pin">A0</span> подключен к МК <span class="span_pin">P3.5</span></div>
+				</p>
+			</div>
+			
+			<h2>Применение внешних прерываний - простая игра</h2>
+			<div class="articlebody">
+				<p>Код ASM приложения <span class="span_file">fastman.asm</span> (а также бинарника для записи на МК через программатор) на <a href="https://github.com/zelderus/ZeBoy/blob/master/fastman.asm" target="_blank">GIT</a>.</p>
+			</div>
+			
+			<h2>Далее</h2>
+			<div class="articlebody">
+				<p>
+					<div>В итоге видим, как не хватает ОЗУ - для буфера данных вывода на дисплей.</div>
+					<div>Далее следует подобрать МК с возможностью работы с внешней памятью (SRAM), а также саму память.</div>
+				</p>
+				<p>
+					<div>Как варианты:</div>
+					<div>Микроконтроллер. Даташит <a href="http://www.atmel.com/images/doc1920.pdf" target="_blank">AT89C51RC-24PU</a> фирмы Atmel.</div>
+					<div>SRAM. Даташит <a href="http://lib.chipdip.ru/048/DOC000048480.pdf" target="_blank">UT62256CPCL-70LL</a> фирмы Utron.</div>
+				</p>
+			</div>
+			
+		</div>
+
+	</body>
+
+</html>

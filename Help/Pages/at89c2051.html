@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ZeBOY</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="../Content/styles.css" media="screen" rel="stylesheet">
+	</head>	
+
+
+	<body>
+		<div class="header">ZeBOY</div>
+		<div class="menu">
+			<a href="../help.html">Home</a>
+			<a href="mt12232a.html">LCD Display</a>
+			<a href="at89c2051.html"  class="current">AT89C2051</a>
+			<a href="lcdmk.html">LCD and MK</a>
+			<a href="mkflash.html">MK and SRAM</a>
+		</div>
+
+		<div class="content">
+			<h1>Atmel AT89C2051</h1>
+			<div class="articlebody">Работа с MK <a href="http://www.atmel.com/images/doc0368.pdf" target="_blank">AT89C2051</a> фирмы Atmel.</div>
+			
+			<h2>Цель</h2>
+			<div>Прошивка МК при помощи Малины необходимым кодом с приминением своего программатора</div>
+			
+			<h2>Программатор PR8051.1 для подключения к RaspberryPi2</h2>
+			<div class="articlebody">
+				<p>Схема:</p>
+				<p><a href="../Content/Images/pr8051_1_s1.jpg" target="_blank"><img class="img_sheme" src="../Content/Images/pr8051_1_s1.jpg"/></a></p>
+				<p>К программатору подключается также <span class="span_device">A512.1</span>, для смены напряжения <span class="span_volt">5V,12V</span> во время прошивки МК.</p>
+			</div>
+			
+			<h2>A512.1 - Управление питанием с 5V на 12V (подключается к PR8051.1)</h2>
+			<div class="articlebody">
+				<p>Схема:</p>
+				<p><a href="../Content/Images/a512_1_1.png" target="_blank"><img class="img_sheme" src="../Content/Images/a512_1_1.png"/></a></p>
+				<p>При подачи <span class="span_data">H</span>(лог. 1) на <span class="span_pin">С</span>, на выходе (контакт <span class="span_pin">RST</span>) будет <span class="span_volt">5V</span>, иначе <span class="span_volt">12V</span>.</p>
+			</div>
+			
+			
+			<h2>Подключение PR8051.1 к RaspberryPi2</h2>
+			<div class="articlebody">
+				<p>Распиновка (default) для RaspberryPi 2</p>
+				<table class="table_pins">
+					<thead>
+						<tr>
+							<th>PR8051.1</th>
+							<th>RPi Pin</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td>XL1</td><td>17</td></tr>
+						<tr><td>RST</td><td>4</td></tr>
+						
+						<tr><td>P3.1</td><td>18</td></tr>
+						<tr><td>P3.2</td><td>23</td></tr>
+						<tr><td>P3.3</td><td>27</td></tr>
+						<tr><td>P3.4</td><td>22</td></tr>
+						<tr><td>P3.5_7</td><td>24</td></tr>
+						
+						<tr><td>P0</td><td>5</td></tr>
+						<tr><td>P1</td><td>6</td></tr>
+						<tr><td>P2</td><td>13</td></tr>
+						<tr><td>P3</td><td>19</td></tr>
+						<tr><td>P4</td><td>26</td></tr>
+						<tr><td>P5</td><td>16</td></tr>
+						<tr><td>P6</td><td>20</td></tr>
+						<tr><td>P7</td><td>21</td></tr>
+					</tbody>
+				</table>
+			</div>
+			
+			<h2>Драйвер на Python</h2>
+			<div class="articlebody">
+				<p>Код драйвера на <a href="https://github.com/zelderus/ZeBoy/blob/master/pr8051.py" target="_blank">GIT</a>. Данный драйвер применяется через программатор <span class="span_device">PR8051.1</span></p>
+			</div>
+			
+			<h2>Применение с Raspberry</h2>
+			<div class="articlebody">
+				<p>Пример программы на Python3:</p>
+				<div class="code_simple">
+					<textarea class="txt_code" style="height:400px;">
+		import pr8051 as mk
+		
+		# инициализация
+		mk.mkInit()  				
+			
+		# запись. вариант 1
+		# очистка МК и запись из двоичного ("prog.bin") файла программы
+		mk.mkWrite("prog.bin")
+		
+		# запись. вариант 2
+		# очистка МК и запись из массива байтов
+		bts = []
+		bts.append(0x02)
+		bts.append(0x00)
+		bts.append(0x03)
+		bts.append(0x75)
+		bts.append(0x90)
+		bts.append(0x81) #!!!! LED P1.0, P1.7 - disable
+		bts.append(0x02)
+		bts.append(0x00)
+		bts.append(0x03)
+		mk.mkWriteByArr(bts)
+		
+			
+					</textarea>
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>

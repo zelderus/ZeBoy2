@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ZeBOY</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="../Content/styles.css" media="screen" rel="stylesheet">
+	</head>	
+
+
+	<body>
+		<div class="header">ZeBOY</div>
+		<div class="menu">
+			<a href="../help.html">Home</a>
+			<a href="mt12232a.html" class="current">LCD Display</a>
+			<a href="at89c2051.html">AT89C2051</a>
+			<a href="lcdmk.html">LCD and MK</a>
+			<a href="mkflash.html">MK and SRAM</a>
+		</div>
+
+		<div class="content">
+			<h1>LCD MT-12232A</h1>
+			<div class="articlebody">Работа с дисплеем <a href="http://www.melt.com.ru/docs/MT-12232A.pdf" target="_blank">MT-12232A</a> фирмы МЭЛТ.</div>
+			
+			<h2>Цель</h2>
+			<div>Подключение дисплея к Малине и	вывод на экран изображений</div>
+			
+			<h2>Подключение к RaspberryPi2</h2>
+			<div class="articlebody">
+				<p>Распиновка (default) для RaspberryPi 2</p>
+				<table class="table_pins">
+					<thead>
+						<tr>
+							<th>Device</th>
+							<th>RPi Pin</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td>A0</td><td>4</td></tr>
+						<tr><td>RW</td><td>17</td></tr>
+						<tr><td>E</td><td>27</td></tr>
+						<tr><td>RES</td><td>22</td></tr>
+						<tr><td>CS</td><td>25</td></tr>
+						
+						<tr><td>P0</td><td>18</td></tr>
+						<tr><td>P1</td><td>23</td></tr>
+						<tr><td>P2</td><td>24</td></tr>
+						<tr><td>P3</td><td>12</td></tr>
+						<tr><td>P4</td><td>6</td></tr>
+						<tr><td>P5</td><td>13</td></tr>
+						<tr><td>P6</td><td>19</td></tr>
+						<tr><td>P7</td><td>26</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<h2>Драйвер на Python</h2>
+			<div class="articlebody">
+				<p>Код драйвера на <a href="https://github.com/zelderus/ZeBoy/blob/master/mtdriver.py" target="_blank">GIT</a></p>
+			</div>
+			
+			<h2>Применение с Raspberry</h2>
+			<div class="articlebody">
+				<p>Пример программы на Python3:</p>
+				<div class="code_simple">
+					<textarea class="txt_code" style="height:200px;">
+		import mtdriver as mt
+		
+		def setup():
+			mt.lcdInit()  				#инициализация
+			mt.lcdClear() 				#очистка экрана
+		def loop():
+			mt.mtxClearMatrix() 		#очистка матрицы
+			mt.mtxPutPixel(1, 1, 1) 	#рисуем в матрицу
+			#..							# рисуем много всего на свои пиксели
+			mt.lcdDraw()				#рендер конечной картинки на экран
+					</textarea>
+				</div>
+			</div>
+			
+			<h2>Заметки</h2>
+			<div class="articlebody">
+				<h3>Подсветка. Потребление тока.</h3>
+				<p>Подсветка дисплея использует 70mA. Если батарейка слишком маленького размера, то, как правило, дает мало тока и может быть недостаточным. Изображение будет тусклым.</p>
+				
+				<h3>Мерцание экрана.</h3>
+				<p>TODO:</p>
+			</div>
+			
+			
+		</div>
+
+	</body>
+
+</html>
