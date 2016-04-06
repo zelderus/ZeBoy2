@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>ZeBOY</title>
+		<title>ZeBOY 2</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="../Content/styles.css" media="screen" rel="stylesheet">
 	</head>	
 
 
 	<body>
-		<div class="header">ZeBOY</div>
+		<div class="header">ZeBOY 2</div>
 		<div class="menu">
-			<a href="../help.html">Home</a>
+			<a href="../index.html">Home</a>
 			<a href="mt12232a.html">LCD Display</a>
 			<a href="at89c2051.html"  class="current">AT89C2051</a>
 			<a href="lcdmk.html">LCD and MK</a>
@@ -42,38 +42,75 @@
 			<h2>Подключение PR8051.1 к RaspberryPi2</h2>
 			<div class="articlebody">
 				<p>Распиновка (default) для RaspberryPi 2</p>
-				<table class="table_pins">
-					<thead>
-						<tr>
-							<th>PR8051.1</th>
-							<th>RPi Pin</th>
-						</tr>
-					</thead>
+				<table class="table_pins2">
 					<tbody>
-						<tr><td>XL1</td><td>17</td></tr>
-						<tr><td>RST</td><td>4</td></tr>
-						
-						<tr><td>P3.1</td><td>18</td></tr>
-						<tr><td>P3.2</td><td>23</td></tr>
-						<tr><td>P3.3</td><td>27</td></tr>
-						<tr><td>P3.4</td><td>22</td></tr>
-						<tr><td>P3.5_7</td><td>24</td></tr>
-						
-						<tr><td>P0</td><td>5</td></tr>
-						<tr><td>P1</td><td>6</td></tr>
-						<tr><td>P2</td><td>13</td></tr>
-						<tr><td>P3</td><td>19</td></tr>
-						<tr><td>P4</td><td>26</td></tr>
-						<tr><td>P5</td><td>16</td></tr>
-						<tr><td>P6</td><td>20</td></tr>
-						<tr><td>P7</td><td>21</td></tr>
+						<tr>
+							<td>PR8051.1</td>
+							<td>XL1</td>
+							<td>RST</td>
+							<td>P3.1</td>
+							<td>P3.2</td>
+							<td>P3.3</td>
+							<td>P3.4</td>
+							<td>P3.5_7</td>
+							<td>P0</td>
+							<td>P1</td>
+							<td>P2</td>
+							<td>P3</td>
+							<td>P4</td>
+							<td>P5</td>
+							<td>P6</td>
+							<td>P7</td>
+						</tr>
+						<tr>
+							<td>RPi Pin</td>
+							<td>17</td>
+							<td>4</td>
+							<td>18</td>
+							<td>23</td>
+							<td>27</td>
+							<td>22</td>
+							<td>24</td>
+							<td>5</td>
+							<td>6</td>
+							<td>13</td>
+							<td>19</td>
+							<td>26</td>
+							<td>16</td>
+							<td>20</td>
+							<td>21</td>
+						</tr>
 					</tbody>
 				</table>
+				
 			</div>
 			
 			<h2>Драйвер на Python</h2>
 			<div class="articlebody">
 				<p>Код драйвера на <a href="https://github.com/zelderus/ZeBoy/blob/master/pr8051.py" target="_blank">GIT</a>. Данный драйвер применяется через программатор <span class="span_device">PR8051.1</span></p>
+				<div>
+					<h3>Читаем даташит (прошивка МК):</h3>
+					<div class="datashit">
+						<div class="ds_title">Programming The Flash</div>
+						<div class="ds_body">
+							<div class="ds_body_line"><div class="ds_body_num">1.</div><div class="ds_body_content"><p>Power-up sequence:</p><p>Apply power between VCC and GND pins</p><p>Set RST and XTAL1 to GND</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">2.</div><div class="ds_body_content"><p>Set pin RST to “H”</p><p>Set pin P3.2 to “H”</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">3.</div><div class="ds_body_content"><p>Apply the appropriate combination of “H” or “L” logic levels to pins P3.3, P3.4, P3.5, P3.7 to select one of the programming operations shown in the PEROM Programming Modes table.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">-</div><div class="ds_body_content"><p>To Program and Verify the Array:</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">4.</div><div class="ds_body_content"><p>Apply data for Code byte at location 000H to P1.0 to P1.7.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">5.</div><div class="ds_body_content"><p>Raise RST to 12V to enable programming</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">6.</div><div class="ds_body_content"><p>Pulse P3.2 once to program a byte in the PEROM array or the lock bits. The byte-write cycle is self-timed and typically takes 1.2 ms.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">7.</div><div class="ds_body_content"><p>To verify the programmed data, lower RST from 12V to logic “H” level and set pins P3.3 to P3.7 to the appropriate levels. Output data can be read at the port P1 pins.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">8.</div><div class="ds_body_content"><p>To program a byte at the next address location, pulse XTAL1 pin once to advance the internal address counter. Apply new data to the port P1 pins.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">9.</div><div class="ds_body_content"><p>Repeat steps 6 through 8, changing data and advancing the address counter for the entire 2K bytes array or until the end of the object file is reached.</p></div></div>
+							<div class="ds_body_line"><div class="ds_body_num">10.</div><div class="ds_body_content"><p>Power-off sequence:</p><p>set XTAL1 to “L”</p><p>set RST to “L”</p><p>Turn VCC power off</p></div></div>
+						</div>
+					</div>
+					<h3>Реализация:</h3>
+					<div>
+						Пример функции на <a href="https://github.com/zelderus/ZeBoy/blob/master/pr8051.py#L292" target="_blank">GIT (функция _writeToMk)</a>.
+					</div>
+				</div>
 			</div>
 			
 			<h2>Применение с Raspberry</h2>

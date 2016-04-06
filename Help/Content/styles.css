@@ -54,6 +54,25 @@ h2 { color: #fff; background-color: #00506b; padding: 4px 8px;}
 .table_pins  th {    padding: 8px; border: 1px solid #aaa;    background-color: #f1f1f1;}
 .table_pins tbody {}
 .table_pins tbody td {padding: 8px; border: 1px solid #bbb; text-align:center;}
+/* таблица распиновки (горизонтальная) */
+.table_pins2 {width: 200px; border-collapse: collapse; border:2px solid #666;}
+.table_pins2 tbody {}
+.table_pins2 tbody tr{}
+.table_pins2 tbody tr td:first-child {padding: 8px; border: 1px solid #aaa;    background-color: #f1f1f1; font-weight: bold; min-width:100px;}
+.table_pins2 tbody tr td {padding: 8px; border: 1px solid #bbb; text-align:center;}
+
+/* документация */
+.datashit { padding: 10px 30px;border: 1px solid #666;display: inline-block;background-color: #E5F9FF;}
+.datashit p {margin:0;}
+.datashit .ds_title {padding: 8px;font-weight: bold; min-width:100px;color: #007399;}
+.datashit .ds_body {}
+.datashit .ds_body .ds_body_line { overflow: hidden;    margin: 0 0 10px 0;}
+.datashit .ds_body .ds_body_line .ds_body_num {display: inline-block;float: left; margin: 0 10px 0 5px;font-weight: bold;color: #007399;min-width: 30px;  text-align: right;}
+.datashit .ds_body .ds_body_content {overflow: hidden;}
+
+/* видео youtube */
+.ytvw { text-align: left;}
+.ytvw .ytv {text-align: left; margin: 0 !important;}
 
 /* вставки кода */
 .code_simple {}
