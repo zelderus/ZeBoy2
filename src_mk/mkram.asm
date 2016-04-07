@@ -11,13 +11,38 @@
 
 
 
+
+
+;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+;
+; 						HELP
+;
+; 	; включение AUXR.1 бита, для включения работы с внешней памятью средставми МК
+; SETB 08FH
+;
+;	; запись в оперативку (0100H to FFFFH)
+; MOV DPH, #0x01
+; MOV DPL, #0x00
+; MOVX @DPTR, A		; write
+;
+;	; чтение из оперативки
+; MOV DPH, #0x01
+; MOV DPL, #0x00
+; MOVX A, @DPTR		; read
+;
+;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
+
 ;======================================================
 ;
 ;	определения компилятору
 ;
 ;	если 1, то на реальный дисплей (адресация)
 ;	если 0, то для теста на Proteus
-	F_LCD_RELEASE EQU 1
+	F_LCD_RELEASE EQU 0
 
 
 
@@ -62,9 +87,7 @@
 	RAM_CE	EQU P3.3 ; только как заглушка, для низкого уровня
 	RAM_OE	EQU P3.7
 	RAM_WE	EQU P3.6
-	;RAM_CE	EQU P3.3
-	;RAM_OE	EQU P3.7
-	;RAM_WE	EQU P3.6
+
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; PROG help
@@ -125,14 +148,6 @@ DISINTS: ;set up control registers & ports
 	MOV IE, 	#0x00 ;disable interrupts
 	RET
 
-; button interrupt
-INITBUTTONINT:
-	;SETB EA
-	;SETB EX0 ;=IE.0	; enable external interrupt 0
-	RET
-	
-	
-
 	
 ; =====================
 ;
@@ -143,9 +158,7 @@ MAIN:
 	ACALL DISINTS
 	ACALL LCDINIT
 	ACALL RAMINIT
-	ACALL INITBUTTONINT
 	ACALL LOOPRAM
-
 
 
 	
@@ -161,85 +174,87 @@ MAIN:
 LOOPRAM:
 	ACALL LCDCLEAR
 
+	;
+	; write to RAM from Data
+	; запись данных в оперативку из области данных
+	;
+	; RAM addr (в стек стартовая позиция куда в оперативку)
+	MOV DPTR, #0x0100
+	PUSH DPH
+	PUSH DPL
+	; Data addr (в стек стартовая позиция данных для записи)
+	MOV DPTR, #DDD_DATA_TXT1
+	PUSH DPH
+	PUSH DPL
+	; count bytes for write to RAM
+	MOV R4, #32	
+	_writeby_txt:
+		; = читаем из стека позиции на адреса (в обратном порядке занесения)
+		; --- Data (из стека адрес на текущие данные)
+		POP DPL
+		POP DPH
+		MOV A, #0
+		MOVC A, @A+DPTR
+		; next addr of Data (следующий адрес на данные, пока запоминаем в регистрах)
+		INC DPTR
+		MOV R0, DPH
+		MOV R1, DPL
+		; --- RAM addr (из стека адрес на позицию в оперативке)
+		POP DPL
+		POP DPH
+		; write (by smart MK)
+		MOVX @DPTR, A
+		; next RAM (следующий адрес на оперативку, пока запоминаем в регистрах)
+		INC DPTR
+		MOV R2, DPH
+		MOV R3, DPL
+
+		; = записываем в стек новые позиции на адреса (в обратном порядке чтения)
+		; адрес на оперативку
+		MOV A, R2
+		PUSH ACC
+		MOV A, R3
+		PUSH ACC
+		; адрес на данные
+		MOV A, R0
+		PUSH ACC
+		MOV A, R1
+		PUSH ACC
+		
+		DJNZ R4, _writeby_txt
+	; восстанавливаем стек
+	POP DPL
+	POP DPH
+	POP DPL
+	POP DPH
 	
-	; write to RAM
-	;MOV DPH, #0x01
-	;MOV DPL, #0x00
-	;MOV A, #0xAA
-	;MOVX @DPTR, A
-	;-
-	MOV R0, #0x01
-	MOV R1, #0x00
-	MOV A, #0xFF
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x01
-	MOV A, #0xAA
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x02
-	MOV A, #0x55
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x03
-	MOV A, #0xAA
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x04
-	MOV A, #0x55
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x05
-	MOV A, #0xAA
-	ACALL RAMWRITEDO
-	;-
-	MOV R1, #0x06
-	MOV A, #0xFF
-	ACALL RAMWRITEDO
 	
-	
+	;
+	; Draw from RAM
+	; отрисовка данных на дисплей из оперативки
+	;
 	_doram2:
-		; reset addr
+		; LCD reset addr
 		MOV R0, #0xE2
 		ACALL LCDWRITE_CODE_L
 		MOV R0, #0xB9 ; page 1
 		ACALL LCDWRITE_CODE_L
 		MOV R0, #FIRSTADDLEFT
 		ACALL LCDWRITE_CODE_L
-		
-		; draw preset
-		MOV R0, #0xFF
-		ACALL LCDWRITE_DATA_L
-		MOV R0, #0xAA
-		ACALL LCDWRITE_DATA_L
-		MOV R0, #0xFF
-		ACALL LCDWRITE_DATA_L
-		MOV R0, #0x81
-		ACALL LCDWRITE_DATA_L
-		MOV R0, #0x00
-		ACALL LCDWRITE_DATA_L
-			
-			
-		MOV R4, #0x00
-		MOV R3, #7	; draw cols
+					
+		MOV R4, #0x00	; RAM addr (текущий младший байт адреса на оперативку))
+		MOV R3, #24		; draw count of bytes
 		_dr_ram_12:
-		
-			MOV A, #0xFF
-			
+			;
 			; read from RAM
-			;MOV A, #0x00
-			;MOV DPTR, #0x00
-			;MOV DPH, #0x01
-			;MOVX A, @DPTR
-			;-
-			MOV R0, #0x01
-			MOV A, R4
-			MOV R1, A ;#0x00
-			ACALL RAMREADDO
+			;
+			MOV DPH, #0x01	; мы уверены и знаем старший байт адресации в оперативке
+			MOV DPL, R4		; нам достаточно и младшего байта для увеличения адресации (не так много данных всего)
+			MOVX A, @DPTR
 			; draw
 			MOV R0, A
 			ACALL LCDWRITE_DATA_L
-		
+			; next RAM addr
 			INC R4
 			DJNZ R3, _dr_ram_12
 
@@ -267,12 +282,9 @@ LOOPRAM:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;; сюда вынесено для удобства чтения ;;;;
 	;%%%%%% RAM (для МК кто работает с external памятью)
+	;RAM_CE	EQU P3.3 ;(для низкого уровня)
 	;RAM_OE	EQU P3.7
 	;RAM_WE	EQU P3.6
-	;%%%%%% RAM (для низкого уровня)
-	;RAM_CE	EQU P3.6
-	;RAM_OE	EQU P3.3
-	;RAM_WE	EQU P3.7
 	
 RAMINIT:
 	; если используется низкий уровень
@@ -295,26 +307,29 @@ RAMWRITEJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2, A data) out void
 	MOVX @DPTR, A		; write
 	RET
 ; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
+; эта функцию применять, если МК не умеет работать с 62256
 RAMWRITEN:	; (R0 addr1, R1 addr2, A data) out void
-; TODO
+; TODO: не реализовано
+	SETB RAM_WE
+	MOV P2, R0
+	MOV P0, R1
+	CLR RAM_CE
+	MOV P1, #0xFF
+	MOV P1, A
+	NOP
+	CLR RAM_WE
+	NOP
+	NOP
 	SETB RAM_WE
 	SETB RAM_CE
 	MOV P1, A
-	MOV P0, R0
-	MOV P2, R1
-	CLR RAM_CE
-	CLR RAM_WE
 	NOP
-	;CLR RAM_OE
-	;CLR RAM_WE
-	;CLR RAM_CE
-	SETB RAM_WE
-	SETB RAM_CE
+	MOV P1, #0x00
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMWRITEDO:
 	ACALL RAMWRITE
-	;ACALL RAMWRITEN
+	;ACALL RAMWRITEN ; low level
 	RET
 	
 ; остался как пример (обертка, лучше использовать с постфиксом J)
@@ -332,24 +347,31 @@ RAMREADJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2) out (A data)
 	MOVX A, @DPTR
 	RET
 ; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
+; эта функцию применять, если МК не умеет работать с 62256
 RAMREADN:	; (R0 addr1, R1 addr2) out (A data)
-; TODO
+; TODO: не реализовано
 	SETB RAM_WE
-	SETB RAM_CE
-	SETB RAM_OE
-	MOV P0, R0
-	MOV P2, R1
-	MOV P1, #0x00
 	CLR RAM_CE
 	CLR RAM_OE
+	
+	MOV P2, R0
+	MOV P0, R1
+	NOP
 	MOV A, P1
-	SETB RAM_CE
+	NOP
+	
+	MOV A, #0x00
+	
 	SETB RAM_OE
+	SETB RAM_CE
+	CLR RAM_WE
+	
+	
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMREADDO:
 	ACALL RAMREAD
-	;ACALL RAMREADN
+	;ACALL RAMREADN ; low level
 	RET
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   end of RAM DRIVER	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -607,16 +629,12 @@ LCDCLEAR:
 ;#################################################
 
 
-;; table border (static)
-DDD_DATA_TBLB	EQU 0x7C1
-ORG 0x7C1
-	DB 0xFF, 0xFF, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
-	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
-	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
-	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
-	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA
-	DB 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xFF
-	DB 0xFF
+DDD_DATA_TXT1	EQU 0x0700
+ORG 0x0700
+	DB 0x00, 0xff, 0xff, 0x03, 0x03, 0xff, 0xff, 0x00
+	DB 0x00, 0xff, 0xff, 0x70, 0x0E, 0xff, 0xff, 0x00
+	DB 0x00, 0xff, 0xff, 0xC3, 0xC3, 0xe7, 0xe7, 0x00
+	DB 0x00, 0xcf, 0xef, 0x1d, 0x1d, 0xff, 0xff, 0x00
 
 ; last byte	
 DATABR:
