@@ -6,3 +6,7 @@ __pycache__/
 __pycache__/*
 
 
+fastman2.uvgui.*
+*.uvgui.*
+*/fastman2.uvgui.*
+*/*.uvgui.*

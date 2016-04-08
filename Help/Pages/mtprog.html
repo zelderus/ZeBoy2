@@ -31,13 +31,32 @@
 			</div>
 			
 			<h2>Создание проекта</h2>
-			<div class="articlebody">TODO</div>
+			<div class="articlebody">
+				<div>1. Project - New Project</div>
+				<div>2. Указать папку и название проекта.</div>
+				<div>3. Выбрать левайс. В нашем случае <span class="span_device">AT89C51RC</span>.</div>
+			</div>
 			
 			<h2>Настройка проекта</h2>
-			<div class="articlebody">TODO</div>
+			<div class="articlebody">
+				<div>1. Правой кнопкой по Target1 - Options for Target1.</div>
+				<div>2. Вкладка Target => Memory Model: Large var in XDATA</div>
+				<div>3. Вкладка Output => Create HEX file</div>
+			</div>
 			
-			<h2>Программа на ASM</h2>
-			<div class="articlebody">TODO</div>
+			<h2>Программа</h2>
+			<div class="articlebody">
+				<div>Программа-игра на <span class="span_lng">C</span> можно взять с <a href="https://github.com/zelderus/ZeBoy2/blob/master/src_mk/fastman2/" target="_blank">GIT</a>.</div>
+				
+			</div>
+			
+			<h2>Компиляция</h2>
+			<div class="articlebody">
+				<div>Project - Rebuild all target files</div>
+				<div>В папке <span class="span_file">Objects</span> (поумолчанию) появятся файлы. В том числе файл <span class="span_file">.hex</span> (если не забыли указать в настройках проекта).</div>
+				<div>Этот файл понадобится для конвертации в <span class="span_file">BIN</span> и записи его программатором на МК, а также для тестирования на <span class="span_prog">Proteus</span>.</div>
+			</div>
+			
 			
 		</div>
 

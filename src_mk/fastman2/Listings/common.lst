@@ -1,0 +1,72 @@
+C51 COMPILER V9.55   COMMON                                                                04/08/2016 10:56:52 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE COMMON
+OBJECT MODULE PLACED IN .\Objects\common.obj
+COMPILER INVOKED BY: d:\Keil_v5\C51\BIN\C51.EXE common.c LARGE OPTIMIZE(8,SPEED) PRINT(.\Listings\common.lst) TABS(2) OB
+                    -JECT(.\Objects\common.obj)
+
+line level    source
+
+   1          #include <common.h>
+   2          
+   3          
+   4          int SetBit(int x, int y) { return x|=(1<<y);}
+   5          int ClrBit(int x, int y) {return x&=~(1<<y);}
+   6          int ToggleBit(int x, int y) {return x^=(1<<y);}
+   7          
+   8          
+   9          void nop()
+  10          {
+  11   1        
+  12   1      }
+  13          
+  14          void delay(unsigned int p)
+  15          {
+  16   1        unsigned int i;
+  17   1        for(i=0;i<p;i++)
+  18   1        {
+  19   2          //asm("NOP");
+  20   2          nop();
+  21   2        }
+  22   1      }
+  23          
+  24          void delay1000(unsigned int p)
+  25          {
+  26   1        while(p>0){delay(1000);p--;}
+  27   1      }
+  28          
+  29          void delayMs(unsigned int p)
+  30          {
+  31   1        // TODO
+  32   1        p=1;
+  33   1        while(p>0){delay(1);p--;}
+  34   1      }
+  35          void delayUs(unsigned int p)
+  36          {
+  37   1        // TODO
+  38   1        p=1;
+  39   1        while(p>0){delay(1);p--;}
+  40   1      }
+  41          void delayNs(unsigned int p)
+  42          {
+  43   1        // TODO
+  44   1        p=1;
+  45   1        while(p>0){delay(1);p--;}
+  46   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    197    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+C51 COMPILER V9.55   COMMON                                                                04/08/2016 10:56:52 PAGE 2   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

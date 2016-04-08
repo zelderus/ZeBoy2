@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\lcd.obj",
+".\Objects\common.obj" 
+TO ".\Objects\fastman2" 
+PRINT(".\Listings\fastman2.m51") RAMSIZE(256) 

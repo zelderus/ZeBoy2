@@ -1,0 +1,193 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        04/08/2016  10:56:53  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\lcd.obj, .\Objects\common.obj TO .\Objects\fastman2 PRINT (.\L
+>> istings\fastman2.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: LARGE
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\lcd.obj (LCD)
+  .\Objects\common.obj (COMMON)
+  D:\KEIL_V5\C51\LIB\C51L.LIB (?C_STARTUP)
+  D:\KEIL_V5\C51\LIB\C51L.LIB (?C?CLDPTR)
+  D:\KEIL_V5\C51\LIB\C51L.LIB (?C?IMUL)
+  D:\KEIL_V5\C51\LIB\C51L.LIB (?C?OFFXADD)
+  D:\KEIL_V5\C51\LIB\C51L.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\fastman2 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+                    0008H     0018H                  *** GAP ***
+            BIT     0020H.0   0000H.2   UNIT         _BIT_GROUP_
+                    0020H.2   0000H.6                *** GAP ***
+            IDATA   0021H     0001H     UNIT         ?STACK
+
+            * * * * * * *  X D A T A   M E M O R Y  * * * * * * *
+            XDATA   0000H     01E8H     UNIT         ?XD?MAIN
+            XDATA   01E8H     0009H     UNIT         _XDATA_GROUP_
+            XDATA   01F1H     0007H     UNIT         ?XD?_LCDDRAW?LCD
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     07FDH                  *** GAP ***
+            CODE    0800H     01EDH     UNIT         ?C_INITSEG
+            CODE    09EDH     0104H     UNIT         ?PR?_LCDDRAW?LCD
+            CODE    0AF1H     00C3H     UNIT         ?PR?LCDCLEAR?LCD
+            CODE    0BB4H     00A9H     UNIT         ?PR?_LCDINIT?LCD
+            CODE    0C5DH     009AH     UNIT         ?PR?_LCDDRAWLEFTONLY?LCD
+            CODE    0CF7H     008CH     UNIT         ?C_C51STARTUP
+            CODE    0D83H     0058H     UNIT         ?PR?_WRITEBYTE?LCD
+            CODE    0DDBH     003CH     UNIT         ?PR?VIDEOCLEAR?MAIN
+            CODE    0E17H     0037H     UNIT         ?C?LIB_CODE
+            CODE    0E4EH     0035H     UNIT         ?PR?UPDATE?MAIN
+            CODE    0E83H     0020H     UNIT         ?PR?_CLRBIT?COMMON
+            CODE    0EA3H     001EH     UNIT         ?PR?_SETBIT?COMMON
+            CODE    0EC1H     001EH     UNIT         ?PR?_TOGGLEBIT?COMMON
+            CODE    0EDFH     001CH     UNIT         ?PR?_DELAY1000?COMMON
+            CODE    0EFBH     001BH     UNIT         ?PR?_WRITEDATAL?LCD
+            CODE    0F16H     0019H     UNIT         ?PR?_DELAY?COMMON
+            CODE    0F2FH     0013H     UNIT         ?PR?_LCD_A0?LCD
+            CODE    0F42H     0013H     UNIT         ?PR?_LCD_CS?LCD
+BL51 BANKED LINKER/LOCATER V6.22                                                      04/08/2016  10:56:53  PAGE 2
+
+
+            CODE    0F55H     0012H     UNIT         ?PR?MAIN?MAIN
+            CODE    0F67H     0012H     UNIT         ?PR?_WRITECODEL?LCD
+            CODE    0F79H     0011H     UNIT         ?PR?_DELAYMS?COMMON
+            CODE    0F8AH     0011H     UNIT         ?PR?_DELAYUS?COMMON
+            CODE    0F9BH     0011H     UNIT         ?PR?_DELAYNS?COMMON
+            CODE    0FACH     000BH     UNIT         ?PR?_WRITECODER?LCD
+            CODE    0FB7H     0009H     UNIT         ?PR?LOOP?MAIN
+            CODE    0FC0H     0009H     UNIT         ?PR?VIDEODRAW?MAIN
+            CODE    0FC9H     0007H     UNIT         ?PR?_WRITEDATAR?LCD
+            CODE    0FD0H     0003H     UNIT         ?PR?_LCD_SETD?LCD
+            CODE    0FD3H     0001H     UNIT         ?PR?INITVIDEOBUFF?MAIN
+            CODE    0FD4H     0001H     UNIT         ?PR?NOP?COMMON
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\fastman2 (MAIN)
+
+
+SEGMENT                             BIT_GROUP          XDATA_GROUP
+  +--> CALLED SEGMENT            START    LENGTH     START    LENGTH
+--------------------------------------------------------------------
+?C_C51STARTUP                    -----    -----      -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                    -----    -----      -----    -----
+  +--> ?PR?_LCDINIT?LCD
+  +--> ?PR?LCDCLEAR?LCD
+  +--> ?PR?INITVIDEOBUFF?MAIN
+  +--> ?PR?LOOP?MAIN
+
+?PR?_LCDINIT?LCD                 -----    -----      01E8H    0002H
+  +--> ?PR?_SETBIT?COMMON
+  +--> ?PR?_CLRBIT?COMMON
+  +--> ?PR?_DELAYUS?COMMON
+  +--> ?PR?_DELAYMS?COMMON
+  +--> ?PR?_WRITECODEL?LCD
+  +--> ?PR?_WRITECODER?LCD
+
+?PR?_DELAYUS?COMMON              -----    -----      -----    -----
+  +--> ?PR?_DELAY?COMMON
+
+?PR?_DELAY?COMMON                -----    -----      -----    -----
+  +--> ?PR?NOP?COMMON
+
+?PR?_DELAYMS?COMMON              -----    -----      -----    -----
+  +--> ?PR?_DELAY?COMMON
+
+?PR?_WRITECODEL?LCD              -----    -----      -----    -----
+  +--> ?PR?_WRITEBYTE?LCD
+
+?PR?_WRITEBYTE?LCD               0020H.0  0000H.2    01EFH    0002H
+  +--> ?PR?_CLRBIT?COMMON
+  +--> ?PR?_LCD_A0?LCD
+  +--> ?PR?_LCD_CS?LCD
+  +--> ?PR?_LCD_SETD?LCD
+  +--> ?PR?_DELAYNS?COMMON
+BL51 BANKED LINKER/LOCATER V6.22                                                      04/08/2016  10:56:53  PAGE 3
+
+
+  +--> ?PR?_SETBIT?COMMON
+
+?PR?_DELAYNS?COMMON              -----    -----      -----    -----
+  +--> ?PR?_DELAY?COMMON
+
+?PR?_WRITECODER?LCD              -----    -----      -----    -----
+  +--> ?PR?_WRITEBYTE?LCD
+
+?PR?LCDCLEAR?LCD                 -----    -----      01E8H    0006H
+  +--> ?PR?_WRITECODEL?LCD
+  +--> ?PR?_WRITECODER?LCD
+  +--> ?PR?_WRITEDATAL?LCD
+  +--> ?PR?_WRITEDATAR?LCD
+
+?PR?_WRITEDATAL?LCD              -----    -----      -----    -----
+  +--> ?PR?_WRITEBYTE?LCD
+
+?PR?_WRITEDATAR?LCD              -----    -----      -----    -----
+  +--> ?PR?_WRITEBYTE?LCD
+
+?PR?LOOP?MAIN                    -----    -----      -----    -----
+  +--> ?PR?VIDEOCLEAR?MAIN
+  +--> ?PR?UPDATE?MAIN
+  +--> ?PR?VIDEODRAW?MAIN
+
+?PR?VIDEODRAW?MAIN               -----    -----      -----    -----
+  +--> ?PR?_LCDDRAWLEFTONLY?LCD
+
+?PR?_LCDDRAWLEFTONLY?LCD         -----    -----      01E8H    0007H
+  +--> ?PR?_WRITECODEL?LCD
+  +--> ?PR?_WRITEDATAL?LCD
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\fastman2 (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C?CLDPTR
+  C:0E17H         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+  -------         MODULE        ?C?IMUL
+  C:0E30H         PUBLIC        ?C?IMUL
+  -------         ENDMOD        ?C?IMUL
+
+  -------         MODULE        ?C?OFFXADD
+  C:0E42H         PUBLIC        ?C?OFFXADD
+  -------         ENDMOD        ?C?OFFXADD
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCDDRAW?LCD
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_TOGGLEBIT?COMMON
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      04/08/2016  10:56:53  PAGE 4
+
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY1000?COMMON
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0711H BYTE (88%) *
+******************************************************************************
+
+Program Size: data=9.2 xdata=504 code=2008
+LINK/LOCATE RUN COMPLETE.  3 WARNING(S),  0 ERROR(S)
