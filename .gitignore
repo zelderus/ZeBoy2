@@ -10,3 +10,5 @@ fastman2.uvgui.*
 *.uvgui.*
 */fastman2.uvgui.*
 */*.uvgui.*
+src_mk/fastman2/fastman2.uvgui.*
+src_mk/fastman2/fastman2.uvgui.kotenko_kg
