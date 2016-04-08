@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ZeBOY 2</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="../Content/styles.css" media="screen" rel="stylesheet">
+	</head>	
+
+
+	<body>
+		<div class="header">ZeBOY 2</div>
+		<div class="menu">
+			<a href="../index.html">Home</a>
+			<a href="mklcd.html">LCD</a>
+			<a href="mksram.html" class="current">SRAM</a>
+			<a href="mteeprom.html">EEPROM</a>
+			<a href="mtprog.html">C Program</a>
+			<a href="release.html">Release</a>
+		</div>
+
+		<div class="content">
+			<h1>Работа МК с внешней памятью (SRAM)</h1>
+			<div class="articlebody">
+				<p>Микроконтроллер. Даташит <a href="http://www.atmel.com/images/doc1920.pdf" target="_blank">AT89C51RC-24PU</a> фирмы Atmel.</p>
+				<p>SRAM. Даташит <a href="http://lib.chipdip.ru/048/DOC000048480.pdf" target="_blank">UT62256CPCL-70LL</a> фирмы Utron.</p>
+			</div>
+			
+			<h2>Цель</h2>
+			<div>
+				<p>Написание программы (на <span class="span_lng">ASM</span>) для MK <span class="span_device">AT89C51RC</span> для работы с внешней памятью <span class="span_device">UT62256CPCL-70LL</span>.</p>
+				<p><span class="span_rpi">RPi</span> используется только как инструмент для прошивки МК. В конечном итоге МК должен сам общаться с дисплеем без посторонней помощи.</p>
+			</div>
+
+			
+			<h2>Подключение SRAM к MK</h2>
+			<div class="articlebody">
+				<p><a href="../Content/Images/sh_mkramlcd.png" target="_blank"><img class="img_sheme" src="../Content/Images/sh_mkramlcd.png"/></a></p>
+			</div>
+			
+		
+			<h2>Программа на ASM</h2>
+			<div class="articlebody">
+				<textarea class="txt_code" style="height:240px;">
+	; включение AUXR.1 бита, для включения работы с внешней памятью средствами МК
+	SETB 08FH
+
+	; запись в оперативку (0100H to FFFFH)
+	MOV DPH, #0x01
+	MOV DPL, #0x00
+	MOVX @DPTR, A		; write from A
+
+	; чтение из оперативки
+	MOV DPH, #0x01
+	MOV DPL, #0x00
+	MOVX A, @DPTR		; read to A
+				</textarea>
+				<p>Пример <span class="span_lng">ASM</span> приложения <span class="span_file">mkram.asm</span> (а также бинарника для записи на МК через программатор) на <a href="https://github.com/zelderus/ZeBoy2/blob/master/src_mk/mkram.asm" target="_blank">GIT</a>.</p>
+			</div>
+			
+		</div>
+
+	</body>
+
+</html>

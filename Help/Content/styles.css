@@ -31,6 +31,8 @@ body {
 /* headers */
 h2 { color: #fff; background-color: #00506b; padding: 4px 8px;}
 
+div {}
+li {margin: 2px 0 0 0;}
 
 .content { padding: 20px;}
 .articlebody {}
@@ -48,6 +50,8 @@ h2 { color: #fff; background-color: #00506b; padding: 4px 8px;}
 .span_volt {display: inline-block;border: 1px solid #FF5CAD;color:#FF5CAD;padding: 0 4px;vertical-align: bottom; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;background-color: #fafafa;}
 .span_data {display: inline-block;border: 1px solid #e0e0e0;color:#000;padding: 0 4px;vertical-align: bottom; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;background-color: #fafafa;}
 .span_pin {display: inline-block;border: 1px solid #003DF5;color:#003DF5;padding: 0 4px;vertical-align: bottom; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;background-color: #fafafa;}
+.span_lng { font-weight: bold;display: inline-block;border: 2px dotted #005470;color: #005470;padding: 0 6px;vertical-align: bottom; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;background-color: #fafafa;}
+.span_prog {display: inline-block;border: 2px dotted #A37A00;color:#705400;padding: 0 4px;vertical-align: bottom; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;background-color: #fafafa;}
 
 /* таблица распиновки */
 .table_pins {width: 200px; border-collapse: collapse;}
