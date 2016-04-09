@@ -13,48 +13,44 @@
 			<a href="../index.html">Home</a>
 			<a href="mklcd.html">LCD</a>
 			<a href="mksram.html">SRAM</a>
-			<a href="mteeprom.html">EEPROM</a>
-			<a href="mtprog.html" class="current">C Program</a>
+			<a href="mtprog.html" class="current">ASM Program</a>
 			<a href="release.html">Release</a>
 		</div>
 
 		<div class="content">
-			<h1>Написание приложения на языке 'C' в среде 'Keil' под MK.</h1>
+			<h1>Написание приложения на языке 'ASM' под MK.</h1>
 			<div class="articlebody">
 				<p>Микроконтроллер. Даташит <a href="http://www.atmel.com/images/doc1920.pdf" target="_blank">AT89C51RC-24PU</a> фирмы Atmel.</p>
-				<p>IDE <a href="http://www.keil.com/" target="_blank">Keil</a>.</p>
 			</div>
 			
 			<h2>Цель</h2>
 			<div>
-				<p>Написание программы для MK <span class="span_device">AT89C51RC</span> на языке уровнем повыше, таком как <span class="span_lng">C</span>.</p>
-			</div>
-			
-			<h2>Создание проекта</h2>
-			<div class="articlebody">
-				<div>1. Project - New Project</div>
-				<div>2. Указать папку и название проекта.</div>
-				<div>3. Выбрать левайс. В нашем случае <span class="span_device">AT89C51RC</span>.</div>
-			</div>
-			
-			<h2>Настройка проекта</h2>
-			<div class="articlebody">
-				<div>1. Правой кнопкой по Target1 - Options for Target1.</div>
-				<div>2. Вкладка Target => Memory Model: Large var in XDATA</div>
-				<div>3. Вкладка Output => Create HEX file</div>
+				<p>Написание программы для MK <span class="span_device">AT89C51RC</span> на языке низкого уровня <span class="span_lng">ASM</span>.</p>
 			</div>
 			
 			<h2>Программа</h2>
 			<div class="articlebody">
-				<div>Программу-игру на <span class="span_lng">C</span> можно взять с <a href="https://github.com/zelderus/ZeBoy2/blob/master/src_mk/fastman2/" target="_blank">GIT</a>.</div>
+				<div>Программу-игру на <span class="span_lng">ASM</span> можно взять с <a href="https://github.com/zelderus/ZeBoy2/blob/master/src_mk/fastman2/" target="_blank">GIT</a>.</div>
 				
 			</div>
 			
 			<h2>Компиляция</h2>
 			<div class="articlebody">
-				<div>Project - Rebuild all target files</div>
-				<div>В папке <span class="span_file">Objects</span> (поумолчанию) появятся файлы. В том числе файл <span class="span_file">.hex</span> (если не забыли указать в настройках проекта).</div>
-				<div>Этот файл понадобится для конвертации в <span class="span_file">BIN</span> и записи его программатором на МК, а также для тестирования на <span class="span_prog">Proteus</span>.</div>
+				<p>
+					<div>Программа компилятор с ASM в HEX - <a href="http://www.atmel.com/tools/C51ASM.aspx" target="_blank">скачать</a>.</div>
+					<div>Параметры компилятора (с параметрами <span class="span_data">-I</span> и <span class="span_data">--target</span>), пример (.bat файл):</div>
+					<div class="code_simple">
+						<textarea class="txt_code" style="height:130px;">
+		@echo off
+		set asmpath=D:\Tools\c51asm
+		set propath=D:\Projects\zeboy2\src_mk\fastman2
+		cd %asmpath%\BIN\
+		c51asm %propath%\fastman2.asm -I %asmpath%\INC\at89c51rc2.inc --target at89c51rc2
+		pause
+
+						</textarea>
+					</div>
+				</p>
 			</div>
 			
 			

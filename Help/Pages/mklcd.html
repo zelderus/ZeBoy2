@@ -13,8 +13,7 @@
 			<a href="../index.html">Home</a>
 			<a href="mklcd.html" class="current">LCD</a>
 			<a href="mksram.html">SRAM</a>
-			<a href="mteeprom.html">EEPROM</a>
-			<a href="mtprog.html">C Program</a>
+			<a href="mtprog.html">ASM Program</a>
 			<a href="release.html">Release</a>
 		</div>
 
@@ -22,22 +21,23 @@
 			<h1>Работа МК с Дисплеем</h1>
 			<div class="articlebody">
 				<p>Микроконтроллер. Даташит <a href="http://www.atmel.com/images/doc1920.pdf" target="_blank">AT89C51RC-24PU</a> фирмы Atmel.</p>
-				<p>LCD Nokia 5110 (84x48).</p>
+				<p>LCD MT-12232A (122x32). Даташит <a href="http://www.melt.com.ru/docs/MT-12232A.pdf" target="_blank">MT-12232A</a> фирмы МЭЛТ.</p>
 			</div>
 			
 			<h2>Цель</h2>
 			<div>
-				<p>Написание программы для MK <span class="span_device">AT89C51RC</span> для работы с дисплеем <span class="span_device">Nokia 5110</span>.</p>
+				<p>Написание программы для MK <span class="span_device">AT89C51RC</span> для работы с дисплеем <span class="span_device">MT-12232A</span>.</p>
+			</div>
+	
+			<h2>Подключение LCD к MK</h2>
+			<div class="articlebody">
+				<p><a href="../Content/Images/sh_mkramlcd.png" target="_blank"><img class="img_sheme" src="../Content/Images/sh_mkramlcd.png"/></a></p>
 			</div>
 			
-			<h2>Подключение LCD к RPi</h2>
-			<div class="articlebody">TODO</div>
-			
-			<h2>Подключение LCD к MK</h2>
-			<div class="articlebody">TODO</div>
-			
 			<h2>Программа на ASM</h2>
-			<div class="articlebody">TODO</div>
+			<div class="articlebody">
+				<p>Код <span class="span_lng">ASM</span> приложения аналогичен из проекта <span class="span_device">ZeBoy1</span> - <span class="span_file">mktolcd.asm</span> (а также бинарника для записи на МК через программатор) на <a href="https://github.com/zelderus/ZeBoy/blob/master/src_mk/mktolcd.asm" target="_blank">GIT</a>.</p>
+			</div>
 			
 		</div>
 
