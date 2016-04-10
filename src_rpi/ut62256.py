@@ -22,27 +22,23 @@
 #		b = rmm.readByte(0x01) # out: b=0xFF
 #
 
-import RPi.GPIO as GPIO
-import time
-import binascii
-
-
-# pins
-_we	= 12
+#
+# 	Connection:
+#
+### commands
+_we		= 12
 _ce 	= 18
 _oe 	= 23
-
-# addr bus
+### addr bus
 _p3_0 = 4
 _p3_1 = 17
 _p3_2 = 27
 _p3_3 = 22
 _p3_4 = 25
 _p3_5 = 24
-#_p3_6 = 
-#_p3_7 = 
-
-# data bus
+#_p3_6 = pull down (resistor to ground)
+#_p3_7 = pull down (resistor to ground)
+### data bus
 _p1_0 = 5
 _p1_1 = 6
 _p1_2 = 13
@@ -50,7 +46,14 @@ _p1_3 = 19
 _p1_4 = 26
 _p1_5 = 16
 _p1_6 = 20
-_p1_7 = 21
+_p1_7 = 21 
+# other 8 bit - pull down (resistors to ground)
+
+
+import RPi.GPIO as GPIO
+import time
+import binascii
+
 
 
 
