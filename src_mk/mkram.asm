@@ -158,15 +158,66 @@ MAIN:
 	ACALL DISINTS
 	ACALL LCDINIT
 	ACALL RAMINIT
-	ACALL LOOPRAM
+	;ACALL LOOPRAM
+	ACALL LOOPRAM2
 
-
 	
 	
 	
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	
+LOOPRAM2:
+	
+	; write to RAM
+	MOV R0, #0x01
+	MOV R1, #0x01
+	MOV A, #0xAA
+	ACALL RAMWRITEDO
+	MOV R0, #0x01
+	MOV R1, #0x02
+	MOV A, #0x55
+	ACALL RAMWRITEDO
+	
+	
+	; draw
+	; LCD reset addr
+	MOV R0, #0xE2
+	ACALL LCDWRITE_CODE_L
+	MOV R0, #0xB9 ; page 1
+	ACALL LCDWRITE_CODE_L
+	MOV R0, #FIRSTADDLEFT
+	ACALL LCDWRITE_CODE_L
+		
+	; read
+	MOV R4, #0x00
+	MOV R3, #3
+	_dr_ram_123:
+		;
+		; read from RAM
+		;
+		;MOV DPH, #0x01	; мы уверены и знаем старший байт адресации в оперативке
+		;MOV DPL, R4		; нам достаточно и младшего байта для увеличения адресации (не так много данных всего)
+		;MOVX A, @DPTR
+		MOV R0, #0x01	; мы уверены и знаем старший байт адресации в оперативке
+		MOV A, R4
+		MOV R1, A
+		ACALL RAMREADDO
+		; draw
+		MOV R0, A
+		ACALL LCDWRITE_DATA_L
+		; next RAM addr
+		INC R4
+		DJNZ R3, _dr_ram_123
+			
+			
+	__gogo:
+	JMP __gogo
+	RET
+	
+	
+	
 	
 	
 	
@@ -241,7 +292,7 @@ LOOPRAM:
 		ACALL LCDWRITE_CODE_L
 		MOV R0, #FIRSTADDLEFT
 		ACALL LCDWRITE_CODE_L
-					
+
 		MOV R4, #0x00	; RAM addr (текущий младший байт адреса на оперативку))
 		MOV R3, #24		; draw count of bytes
 		_dr_ram_12:
@@ -260,7 +311,6 @@ LOOPRAM:
 
 		
 	_notdoram2:
-		;JMP _doram2
 		JMP _notdoram2
 		
 	RET
@@ -289,8 +339,8 @@ LOOPRAM:
 RAMINIT:
 	; если используется низкий уровень
 	;SETB RAM_CE	; standby RAM
-	; AUXR.1 = 1
-	SETB 08FH
+	; AUXR.1 = 1 (высокий уровень)
+	;SETB 08FH
 	RET
 ; остался как пример (обертка, лучше использовать с постфиксом J)
 ; т.к. МК подобные AT89C51RC при правильном подключении (шина данных, шина адресации и WE=>WR, OE=>RD, CE=>Ground) 
@@ -309,27 +359,20 @@ RAMWRITEJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2, A data) out void
 ; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
 ; эта функцию применять, если МК не умеет работать с 62256
 RAMWRITEN:	; (R0 addr1, R1 addr2, A data) out void
-; TODO: не реализовано
-	SETB RAM_WE
+; TODO: не протестировано
 	MOV P2, R0
 	MOV P0, R1
 	CLR RAM_CE
-	MOV P1, #0xFF
 	MOV P1, A
-	NOP
 	CLR RAM_WE
-	NOP
-	NOP
+	NOP	; !!!!
 	SETB RAM_WE
 	SETB RAM_CE
-	MOV P1, A
-	NOP
-	MOV P1, #0x00
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMWRITEDO:
-	ACALL RAMWRITE
-	;ACALL RAMWRITEN ; low level
+	;ACALL RAMWRITE
+	ACALL RAMWRITEN ; low level
 	RET
 	
 ; остался как пример (обертка, лучше использовать с постфиксом J)
@@ -339,8 +382,8 @@ RAMREAD:	; (R0 addr1 (0100H to FFFFH), R1 addr2) out (A data)
 	; An access to external data memory locations higher than FFH (i.e. 0100H to FFFFH) will be performed
 	; with the MOVX DPTR instructions in the same way as in the standard 80C51
 	;MOV DPTR, #0x00
-	MOV DPH, R0 ;#0x01	; начиная с 0100H to FFFFH
-	MOV DPL, R1 ;#0x00
+	MOV DPH, R0
+	MOV DPL, R1
 	MOVX A, @DPTR
 	RET
 RAMREADJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2) out (A data)
@@ -349,29 +392,20 @@ RAMREADJ:	; (DPH addr1 (0100H to FFFFH), DPL addr2) out (A data)
 ; версия на низком уровне (CE(RAM) должен быть подключен к RAM_CE(MK))
 ; эта функцию применять, если МК не умеет работать с 62256
 RAMREADN:	; (R0 addr1, R1 addr2) out (A data)
-; TODO: не реализовано
-	SETB RAM_WE
-	CLR RAM_CE
-	CLR RAM_OE
-	
+; TODO: не протестировано
 	MOV P2, R0
 	MOV P0, R1
-	NOP
+	CLR RAM_CE
+	CLR RAM_OE
+	NOP	; !!!!
 	MOV A, P1
-	NOP
-	
-	MOV A, #0x00
-	
 	SETB RAM_OE
 	SETB RAM_CE
-	CLR RAM_WE
-	
-	
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMREADDO:
-	ACALL RAMREAD
-	;ACALL RAMREADN ; low level
+	;ACALL RAMREAD
+	ACALL RAMREADN ; low level
 	RET
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   end of RAM DRIVER	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
