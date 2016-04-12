@@ -119,6 +119,41 @@ LCDWRITE_DATA_R:	; R0 = data byte
 	MOV R1, #0x35 ;#0b00110101 ;(E=1, RW=0, INT0=1, CS=0, RES=1, A0=1)
 	ACALL LCDWRITE
 	RET
+	
+	
+; ----------------------	
+; Подача данных/команды в дисплей (через A)
+; ----------------------
+LCDWRITEM:  ; A = data byte, R1 = cmd
+	; set E,RW,A0,CS
+	; without fix RES
+	MOV P3, R1
+	;s_mtData(b)
+	MOV P1, A
+	;s_delayNs(40.0)	#>40
+	MOV A, #40					; !!!
+	ACALL DELAYNS
+	;s_mtE(0)
+	CLR LCD_E
+	;s_delayNs(160.0)	#>160
+	MOV A, #160
+	ACALL DELAYNS
+	;s_mtE(1)
+	SETB LCD_E
+	;s_delayNs(200.0 - 40.0 - 160.0) #2000.0 - 40.0 - 160.0
+	;MOV A, #1
+	;ACALL DELAYNS
+	RET
+LCDWRITE_DATA_ML:	; A = data byte
+	MOV R1, #0x3D ;#0b00111101 ;(E=1, RW=0, INT0=1, CS=1, RES=1, A0=1)
+	ACALL LCDWRITEM
+	RET
+LCDWRITE_DATA_MR:	; A = data byte
+	MOV R1, #0x35 ;#0b00110101 ;(E=1, RW=0, INT0=1, CS=0, RES=1, A0=1)
+	ACALL LCDWRITEM
+	RET
+	
+	
 ; ----------------------	
 ; Очистка дисплея
 ; ----------------------

@@ -25,8 +25,12 @@
 ;	если 0, то для теста на Proteus
 	F_LCD_RELEASE 	EQU 0
 ;	есди 1, то тест оперативки (test.inc)
-	F_RAM_TEST		EQU 0
-
+	F_RAM_TEST		EQU 1
+; 	метод работы с RAM
+; 		0 - low level (R0 addr1, R1 addr2)
+; 		1 - MK logic 1 (R0 addr1, R1 addr2)
+; 		2 - MK logic 2 (DPH addr1, DPL addr2) - сомнительная полезность (меняется интерфейс обертки)
+	F_RAM_LEVEL		EQU 2
 
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;
@@ -89,6 +93,7 @@
 	ADDR_MAN_FRAMERUN	EQU 0x47
 	ADDR_MAN_CFRUN		EQU 0x48
 	ADDR_MAN_OBST		EQU 0x49
+	
 	
 
 ORG 0x00
@@ -781,6 +786,7 @@ $INCLUDE (common.inc)
 $INCLUDE (mram.inc)
 ;; LCD
 $INCLUDE (mlcd.inc)
+$INCLUDE (video.inc)
 ;; DATA
 $INCLUDE (mdata.inc)
 

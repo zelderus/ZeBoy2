@@ -8,58 +8,53 @@
 
 
 RAMTEST:
-	ACALL ___LOOPRAM
-	;ACALL ___LOOPRAM2
+	;ACALL ___LOOPRAM
+	ACALL ___LOOPRAM3
 	RET
+	
+	
+	
+	
+	
+	
+___LOOPRAM3:
+	__gogo44:
+	; clear
+	ACALL MATRIX_CLEAR
+	; update
+	ACALL ___UPDATE
+	; draw
+	ACALL VIDEO_DRAW2
+	JMP __gogo44
+	RET
+	
+	
+	
+	
+___UPDATE:
+	
+	MOV R0, #1
+	MOV R1, #1
+	ACALL MATRIX_PIXEL
+	
+	MOV R0, #2
+	MOV R1, #7
+	ACALL MATRIX_PIXEL
+	
+	MOV R0, #60
+	MOV R1, #31
+	ACALL MATRIX_PIXEL
+	
+	RET
+	
 	
 	
 
-___LOOPRAM2:
-	;
-	; write to RAM
-	MOV R0, #0x01
-	MOV R1, #0x00
-	MOV A, #0xAA
-	ACALL RAMWRITEDO
-	MOV R0, #0x01
-	MOV R1, #0x01
-	MOV A, #0x55
-	ACALL RAMWRITEDO
-	MOV R0, #0x01
-	MOV R1, #0x02
-	MOV A, #0xAA
-	ACALL RAMWRITEDO
 	
-	; draw
-	; LCD reset addr
-	MOV R0, #0xE2
-	ACALL LCDWRITE_CODE_L
-	MOV R0, #0xB9 ; page 1
-	ACALL LCDWRITE_CODE_L
-	MOV R0, #FIRSTADDLEFT
-	ACALL LCDWRITE_CODE_L
-		
-	; read
-	MOV R4, #0x00
-	MOV R3, #3
-	_dr_ram_123:
-		;
-		; read from RAM
-		MOV R0, #0x01	; мы уверены и знаем старший байт адресации в оперативке
-		MOV A, R4
-		MOV R1, A
-		ACALL RAMREADDO
-		; draw
-		MOV R0, A
-		ACALL LCDWRITE_DATA_L
-		; next RAM addr
-		INC R4
-		DJNZ R3, _dr_ram_123
-			
-			
-	__gogo:
-	JMP __gogo
-	RET
+	
+	
+	
+	
 	
 	
 	
@@ -68,7 +63,7 @@ ___LOOPRAM2:
 	
 ; тестирование RAM
 ___LOOPRAM:
-	ACALL LCDCLEAR
+	;ACALL LCDCLEAR
 
 	;
 	; write to RAM from Data

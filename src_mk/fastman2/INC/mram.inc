@@ -9,7 +9,13 @@
 ;	ZeLDER
 ; ######################################################
 
-
+IFNDEF F_RAM_LEVEL
+; метод работы с RAM
+; 0 - low level (R0 addr1, R1 addr2)
+; 1 - MK logic 1 (R0 addr1, R1 addr2)
+; 2 - MK logic 2 (DPH addr1, DPL addr2) - сомнительная полезность (меняется интерфейс)
+F_RAM_LEVEL		EQU 2
+ENDIF
 
 ;%%%%%% RAM
 RAM_CE	EQU P3.3 ; только как заглушка, для низкого уровня
@@ -51,11 +57,19 @@ RAM_WE	EQU P3.6
 	
 RAMINIT:
 	; если используется низкий уровень
+	IF (F_RAM_LEVEL==0)
 	SETB RAM_CE	; standby RAM
 	SETB RAM_OE
 	SETB RAM_WE
+	ELSE
 	; AUXR.1 = 1 (высокий уровень)
-	;SETB 08FH
+	SETB 08FH
+	ENDIF
+	RET
+RAMWRITEM:	; (DPH addr1 (0100H to FFFFH), DPL addr2, A data) out void
+	; An access to external data memory locations higher than FFH (i.e. 0100H to FFFFH) will be performed
+	; with the MOVX DPTR instructions in the same way as in the standard 80C51
+	MOVX @DPTR, A		; write
 	RET
 ; остался как пример (обертка, лучше использовать с постфиксом J)
 ; т.к. МК подобные AT89C51RC при правильном подключении (шина данных, шина адресации и WE=>WR, OE=>RD, CE=>Ground) 
@@ -86,10 +100,20 @@ RAMWRITEN:	; (R0 addr1, R1 addr2, A data) out void
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMWRITEDO:
+	IF (F_RAM_LEVEL==0)
+	ACALL RAMWRITEN ; low level
+	ELSEIF (F_RAM_LEVEL==1)
 	ACALL RAMWRITE
-	;ACALL RAMWRITEN ; low level
+	ELSEIF (F_RAM_LEVEL==2)
+	ACALL RAMWRITEM ; mini
+	ENDIF
 	RET
 	
+RAMREADM:	; (DPH addr1 (0100H to FFFFH), DPL addr2) out (A data)
+	; An access to external data memory locations higher than FFH (i.e. 0100H to FFFFH) will be performed
+	; with the MOVX DPTR instructions in the same way as in the standard 80C51
+	MOVX A, @DPTR
+	RET
 ; остался как пример (обертка, лучше использовать с постфиксом J)
 ; т.к. МК подобные AT89C51RC при правильном подключении (шина данных, шина адресации и WE=>WR, OE=>RD, CE=>Ground) 
 ; работают сами через MOVX
@@ -119,8 +143,13 @@ RAMREADN:	; (R0 addr1, R1 addr2) out (A data)
 	RET
 ; использовать как обертку для отладки (в релизе лучше использовать необходимую)
 RAMREADDO:
+	IF (F_RAM_LEVEL==0)
+	ACALL RAMREADN ; low level
+	ELSEIF (F_RAM_LEVEL==1)
 	ACALL RAMREAD
-	;ACALL RAMREADN ; low level
+	ELSEIF (F_RAM_LEVEL==2)
+	ACALL RAMREADM ; mini
+	ENDIF
 	RET
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	   end of RAM DRIVER	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
