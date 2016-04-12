@@ -6,11 +6,13 @@
 ;	используя SRAM
 ;
 ;	Functions:
-;		MATRIX_CLEAR
-;		MATRIX_PIXEL
 ;		VIDEO_CLEAR
 ;		VIDEO_DRAW
 ;		VIDEO_DRAW2
+;
+;		MATRIX_CLEAR
+;		MATRIX_PIXEL
+;		MATRIX_SPRITE8
 ;
 ;
 ; ZeLDER
@@ -22,14 +24,19 @@ IFNDEF F_LCD_RELEASE
 	F_LCD_RELEASE 	EQU 1
 ENDIF
 
-
+IFNDEF VIDEO_ADDR
 VIDEO_ADDR			EQU 0x0100
+ENDIF
 VIDEO_ROWS			EQU 61
 VIDEO_PAGES			EQU 4
 VIDEO_PAGE_SZ		EQU 8
 VIDEO_CLRSYMB		EQU 0x00
 VIDEO_ADDR_2		EQU VIDEO_ADDR+(VIDEO_ROWS*VIDEO_PAGES)
-	
+
+; Variables
+IFNDEF ADDR_VAR_VIDEO_SPRITEX
+ADDR_VAR_VIDEO_SPRITEX	EQU 0x0080
+ENDIF
 	
 	
 ;-------------------------------------
@@ -67,125 +74,16 @@ VIDEO_CLEAR:
 
 	
 	
-	
-;-------------------------------------
-;
-; Помещение пикселя в буффер
-;
-;-------------------------------------
-MATRIX_PIXEL: ; R0 - x, R1 - y
-	MOV DPTR, #VIDEO_ADDR
-	; если в правую часть дисплея, то вторая половина памяти
-	MOV A, #VIDEO_ROWS
-	CLR PSW.7
-	SUBB A, R0
-	JNC _mtx_ptpx1
-	MOV DPTR, #VIDEO_ADDR_2
-	_mtx_ptpx1:
-	; вычитаем ряд
-	MOV A, R1
-	MOV B, #VIDEO_PAGE_SZ
-	DIV AB		; (y/8)
-	MOV B, #VIDEO_ROWS
-	MUL AB ; offset in RAM
-	CLR PSW.7
-	MOV R3, DPL
-	ADDC A, R3
-	MOV DPL, A	; slide in RAM
-	JNC _mtx_ptpx2
-	INC DPH
-	_mtx_ptpx2:
-	; смещаем на x
-	MOV A, R0
-	CLR PSW.7
-	MOV R3, DPL
-	ADDC A, R3
-	MOV DPL, A
-	JNC _mtx_ptpx3
-	INC DPH
-	_mtx_ptpx3:
-	; draw
-	; 1<<(y%8)
-	MOV A, R1
-	MOV B, #VIDEO_PAGE_SZ
-	DIV AB		; (y%8)
-	MOV A, B
-	; 1<<A
-	MOV R3, A
-	MOV A, #1
-	_mtx_ptpx4:
-		RL A
-		DJNZ R3, _mtx_ptpx4
-	MOV R3, A
-	; |=
-	MOVX A, @DPTR
-	ORL A, R3
-	; to RAM
-	MOVX @DPTR, A
-	RET
-
 ;-------------------------------------
 ;
 ; Отрисовка видео буффера на дисплей
 ;	
 ;-------------------------------------
-;
-; Отрисовка по страницам (страница слева, страница справа..)
-;
-VIDEO_DRAW:
-	; start video buff
-	MOV DPTR, #VIDEO_ADDR
-	; count of pages
-	MOV R4, #VIDEO_PAGES	
-	_mtx_drw_pages:
-		; 4 to 0
-		MOV A, #4
-		SUBB A, R4
-		MOV R2, A
-		; rows (left)
-		MOV A, R2
-		ORL A, #0xB8
-		MOV R0, A
-		ACALL LCDWRITE_CODE_L
-		MOV R0, #FIRSTADDLEFT
-		ACALL LCDWRITE_CODE_L
-		MOV R5, #VIDEO_ROWS
-		_mtx_drw_rows:
-			; read from RAM
-			MOVX A, @DPTR
-			; draw
-			;MOV R0, A
-			ACALL LCDWRITE_DATA_ML
-			; next RAM addr
-			INC DPTR
-			DJNZ R5, _mtx_drw_rows
-		; rows (right)
-		MOV A, R2
-		ORL A, #0xB8
-		MOV R0, A
-		ACALL LCDWRITE_CODE_R
-		MOV R0, #FIRSTADDRIGHT
-		ACALL LCDWRITE_CODE_R
-		MOV R5, #VIDEO_ROWS
-		_mtx_drw_rows2:
-			; read from RAM
-			MOVX A, @DPTR
-			; draw
-			IF (F_LCD_RELEASE==1)
-			;MOV R0, A
-			ACALL LCDWRITE_DATA_MR
-			ENDIF
-			; next RAM addr
-			INC DPTR
-			DJNZ R5, _mtx_drw_rows2
-		; end of Page cicle
-		DJNZ R4, _mtx_drw_pages
-	RET
-	
+
 ;
 ; Отрисовка по половине дисплея (сначала левая, потом правая)
 ;
-VIDEO_DRAW2:
+VIDEO_DRAW:
 	; start video buff
 	MOV DPTR, #VIDEO_ADDR
 	;
@@ -259,5 +157,190 @@ VIDEO_DRAW2:
 	
 	
 	
+;
+; Отрисовка по страницам (страница слева, страница справа..)
+; НЕ ИСПОЛЬЗУЕТСЯ (ОСТАЛСЯ ДЛЯ ПРИМЕРА)
+; Массив матрицы лежит деленный по половинам дисплея
+;
+VIDEO_DRAW2:
+	; start video buff
+	MOV DPTR, #VIDEO_ADDR
+	; count of pages
+	MOV R4, #VIDEO_PAGES	
+	_mtx_drw_pages:
+		; 4 to 0
+		MOV A, #4
+		SUBB A, R4
+		MOV R2, A
+		; rows (left)
+		MOV A, R2
+		ORL A, #0xB8
+		MOV R0, A
+		ACALL LCDWRITE_CODE_L
+		MOV R0, #FIRSTADDLEFT
+		ACALL LCDWRITE_CODE_L
+		MOV R5, #VIDEO_ROWS
+		_mtx_drw_rows:
+			; read from RAM
+			MOVX A, @DPTR
+			; draw
+			;MOV R0, A
+			ACALL LCDWRITE_DATA_ML
+			; next RAM addr
+			INC DPTR
+			DJNZ R5, _mtx_drw_rows
+		; rows (right)
+		MOV A, R2
+		ORL A, #0xB8
+		MOV R0, A
+		ACALL LCDWRITE_CODE_R
+		MOV R0, #FIRSTADDRIGHT
+		ACALL LCDWRITE_CODE_R
+		MOV R5, #VIDEO_ROWS
+		_mtx_drw_rows2:
+			; read from RAM
+			MOVX A, @DPTR
+			; draw
+			IF (F_LCD_RELEASE==1)
+			;MOV R0, A
+			ACALL LCDWRITE_DATA_MR
+			ENDIF
+			; next RAM addr
+			INC DPTR
+			DJNZ R5, _mtx_drw_rows2
+		; end of Page cicle
+		DJNZ R4, _mtx_drw_pages
+	RET
 	
+	
+	
+	
+	
+;-------------------------------------
+;
+; HELPERS
+;
+;-------------------------------------
+	
+	
+;-------------------------------------
+; Помещение пикселя в буффер
+;-------------------------------------
+MATRIX_PIXEL: ; R0 - x, R1 - y
+	MOV DPTR, #VIDEO_ADDR
+	; если в правую часть дисплея, то вторая половина памяти
+	MOV A, #VIDEO_ROWS
+	CLR PSW.7
+	SUBB A, R0
+	JNC _mtx_ptpx1
+	MOV DPTR, #VIDEO_ADDR_2
+	_mtx_ptpx1:
+	; вычитаем ряд
+	MOV A, R1
+	MOV B, #VIDEO_PAGE_SZ
+	DIV AB		; (y/8)
+	MOV B, #VIDEO_ROWS
+	MUL AB ; offset in RAM
+	CLR PSW.7
+	MOV R3, DPL
+	ADDC A, R3
+	MOV DPL, A	; slide in RAM
+	JNC _mtx_ptpx2
+	INC DPH
+	_mtx_ptpx2:
+	; смещаем на x
+	MOV A, R0
+	CLR PSW.7
+	MOV R3, DPL
+	ADDC A, R3
+	MOV DPL, A
+	JNC _mtx_ptpx3
+	INC DPH
+	_mtx_ptpx3:
+	; draw
+	; 1<<(y%8)
+	MOV A, R1
+	MOV B, #VIDEO_PAGE_SZ
+	DIV AB		; (y%8)
+	MOV A, B
+	; 1<<A
+	MOV R3, A
+	MOV A, #1
+	_mtx_ptpx4:
+		RL A
+		DJNZ R3, _mtx_ptpx4
+	MOV R3, A
+	; |=
+	MOVX A, @DPTR
+	ORL A, R3
+	; to RAM
+	MOVX @DPTR, A
+	RET
+
+;-------------------------------------
+;	MATRIX_SPRITE8
+;		R5 		- x
+;		R6 		- y
+;		DPTR 	- addr of sprite (8x8)
+;-------------------------------------
+MATRIX_SPRITE8: 
+	; in
+	;MOV R5, #1
+	;MOV R6, #1
+	;MOV DPTR, #DDD_SPRITE_OBJ1
+	PUSH DPH
+	PUSH DPL
+	; read sprite
+	; rows X (#ADDR_VAR_VIDEO_SPRITEX)
+	; var OffsetX
+	MOV DPTR, #ADDR_VAR_VIDEO_SPRITEX
+	MOV A, #0x00
+	MOVX @DPTR, A
+	MOV R2, #8
+	__drw_smbX:
+		; x
+		; OffsetX + posX
+		MOV DPTR, #ADDR_VAR_VIDEO_SPRITEX
+		MOVX A, @DPTR
+		ADD A, R5
+		MOV R0, A
+		; OffsetX = OffsetX+1
+		MOVX A, @DPTR
+		INC A
+		MOVX @DPTR, A
+		; y
+		MOV A, R6
+		MOV R1, A
+		; from Sprite data
+		POP DPL	
+		POP DPH
+		MOV A, #0
+		MOVC A, @A+DPTR
+		INC DPTR
+		PUSH DPH
+		PUSH DPL
+		PUSH ACC
+		; draw row (byte)
+		MOV R4, #8
+		__drw_smbY:
+			; bit
+			POP ACC
+			CLR PSW.7
+			RRC A
+			PUSH ACC
+			;		
+			JNC __drw_smbX_f
+			ACALL MATRIX_PIXEL
+			__drw_smbX_f:
+			; y++
+			MOV A, R1
+			INC A
+			MOV R1, A
+			;
+			DJNZ R4, __drw_smbY
+		POP ACC
+		DJNZ R2, __drw_smbX
+	POP DPL
+	POP DPH
+	RET
 	

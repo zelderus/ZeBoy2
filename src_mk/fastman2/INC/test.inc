@@ -18,14 +18,25 @@ RAMTEST:
 	
 	
 ___LOOPRAM3:
+	ACALL ___TESTSETXZERO
 	__gogo44:
-	; clear
-	ACALL MATRIX_CLEAR
-	; update
-	ACALL ___UPDATE
-	; draw
-	ACALL VIDEO_DRAW2
+		; clear
+		ACALL MATRIX_CLEAR
+		; update
+		ACALL ___UPDATE
+		; draw
+		ACALL VIDEO_DRAW
 	JMP __gogo44
+	RET
+	
+	
+	
+	
+___TESTSETXZERO:
+	; var X
+	MOV DPTR, #ADDR_VAR_TEST
+	MOV A, #0x00
+	MOVX @DPTR, A
 	RET
 	
 	
@@ -33,23 +44,46 @@ ___LOOPRAM3:
 	
 ___UPDATE:
 	
-	MOV R0, #1
-	MOV R1, #1
-	ACALL MATRIX_PIXEL
+	; var x
+	MOV DPTR, #ADDR_VAR_TEST
+	MOVX A, @DPTR
+	INC A
+	; reset
+	CJNE A, #10, ___cjjp
+		MOV A, #0 
+	___cjjp:
+	MOVX @DPTR, A
 	
-	MOV R0, #2
-	MOV R1, #7
-	ACALL MATRIX_PIXEL
+	; draw 1
+	MOV R5, A
+	PUSH ACC
+	MOV R6, #1
+	MOV DPTR, #DDD_SPRITE_OBJ1
+	ACALL MATRIX_SPRITE8
 	
-	MOV R0, #60
-	MOV R1, #31
-	ACALL MATRIX_PIXEL
+	
+	; draw 2
+	POP ACC
+	MOV R5, A
+	PUSH ACC
+	MOV R6, #14
+	MOV DPTR, #DDD_SPRITE_OBJ1+(1*8)
+	ACALL MATRIX_SPRITE8
+	
+	; draw 3
+	POP ACC
+	MOV R5, A
+	MOV R6, #24
+	MOV DPTR, #DDD_SPRITE_OBJ1+(2*8)
+	ACALL MATRIX_SPRITE8
 	
 	RET
 	
 	
 	
-
+	
+	
+	
 	
 	
 	
