@@ -9,16 +9,52 @@
 
 RAMTEST:
 	;ACALL ___LOOPRAM
-	ACALL ___LOOPRAM3
+	
+	ACALL ___POSTTEST
+	;ACALL ___RAMTEST
+	
+	;ACALL ___LOOPRAM3
+	RET
+	
+	
+; тест порта (мигание)
+___POSTTEST:
+	; led on
+	MOV P1, #0xFF
+	MOV A, #2
+	ACALL DELAYS
+	; led off
+	MOV P1, #0x00
+	MOV A, #2
+	ACALL DELAYS
+	JMP ___POSTTEST
+	RET
+; тест оперативки (мигание)
+___RAMTEST:
+	; write to RAM
+	MOV DPTR, #0x0200
+	MOV A, #0xAA
+	MOVX @DPTR, A
+	; view
+	___rmtt_lop:
+	MOV DPTR, #0x0200
+	MOVX A, @DPTR
+	; led on
+	MOV P1, A
+	MOV A, #2
+	ACALL DELAYS
+	; led off
+	MOV P1, #0x00
+	MOV A, #2
+	ACALL DELAYS
+	JMP ___rmtt_lop
 	RET
 	
 	
 	
 	
-	
-	
 ___LOOPRAM3:
-	ACALL ___TESTSETXZERO
+	ACALL ___RESETZERO
 	__gogo44:
 		; clear
 		ACALL MATRIX_CLEAR
@@ -31,10 +67,19 @@ ___LOOPRAM3:
 	
 	
 	
-	
-___TESTSETXZERO:
-	; var X
+;
+;	Сброс парамтеров в RAM
+;
+___RESETZERO:
+	; var test
 	MOV DPTR, #ADDR_VAR_TEST
+	MOV A, #0x00
+	MOVX @DPTR, A
+	; var PosX
+	MOV DPTR, #ADDR_VAR_GG_POSX_H
+	MOV A, #0x00
+	MOVX @DPTR, A
+	MOV DPTR, #ADDR_VAR_GG_POSX_L
 	MOV A, #0x00
 	MOVX @DPTR, A
 	RET
@@ -42,7 +87,70 @@ ___TESTSETXZERO:
 	
 	
 	
+; максимальное количество позиции на карте (по X)
+GG_MAXXPOS	EQU 0x05DC	;1500
+	
+	
 ___UPDATE:
+	
+	
+	;--- var PosX ---
+	MOV DPTR, #ADDR_VAR_GG_POSX_H
+	MOVX A, @DPTR
+	MOV R1, A
+	MOV DPTR, #ADDR_VAR_GG_POSX_L
+	MOVX A, @DPTR
+	MOV R2, A
+	; next PosX
+	ACALL MATH_INC16
+	; check (as GG_MAXXPOS)
+	CJNE R2, #0xDC, __gg_posx_cmp1
+		CJNE R1, #0x05, __gg_posx_cmp1
+			MOV R1, #0 
+			MOV R2, #0 
+	__gg_posx_cmp1:
+	; save PosX
+	MOV A, R1
+	MOV DPTR, #ADDR_VAR_GG_POSX_H
+	MOVX @DPTR, A
+	MOV A, R2
+	MOV DPTR, #ADDR_VAR_GG_POSX_L
+	MOVX @DPTR, A
+	; to DPTR
+	MOV DPH, R1
+	MOV DPL, R2
+	;--- end of PosX ---
+	
+
+	
+	
+	
+	
+	; draw 1
+	MOV R6, #1
+	MOV DPTR, #DDD_SPRITE_OBJ1
+	ACALL MATRIX_SPRITE8
+	; draw 2
+	MOV R6, #14
+	MOV DPTR, #DDD_SPRITE_OBJ1+(1*8)
+	ACALL MATRIX_SPRITE8
+	; draw 3
+	MOV R6, #24
+	MOV DPTR, #DDD_SPRITE_OBJ1+(2*8)
+	ACALL MATRIX_SPRITE8
+	
+	RET	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+___UPDATE___old:
 	
 	; var x
 	MOV DPTR, #ADDR_VAR_TEST
@@ -53,25 +161,20 @@ ___UPDATE:
 		MOV A, #0 
 	___cjjp:
 	MOVX @DPTR, A
-	
-	;x
 	MOV R5, A
 	
 	; draw 1
 	MOV R6, #1
 	MOV DPTR, #DDD_SPRITE_OBJ1
 	ACALL MATRIX_SPRITE8
-		
 	; draw 2
 	MOV R6, #14
 	MOV DPTR, #DDD_SPRITE_OBJ1+(1*8)
 	ACALL MATRIX_SPRITE8
-	
 	; draw 3
 	MOV R6, #24
 	MOV DPTR, #DDD_SPRITE_OBJ1+(2*8)
 	ACALL MATRIX_SPRITE8
-	
 	RET
 	
 	

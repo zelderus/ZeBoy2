@@ -121,7 +121,7 @@ VIDEO_DRAW:
 	; R
 	IF (F_LCD_RELEASE==1)
 	; start video buff
-	MOV DPTR, #VIDEO_ADDR
+	;MOV DPTR, #VIDEO_ADDR
 	; count of pages
 	MOV R4, #VIDEO_PAGES	
 	_mtx_drw_pages2dd:
