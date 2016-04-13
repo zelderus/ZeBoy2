@@ -787,6 +787,7 @@ ENDIF
 
 ;; CORE
 $INCLUDE (common.inc)
+$INCLUDE (math.inc)
 ;; RAM
 $INCLUDE (mram.inc)
 ;; LCD

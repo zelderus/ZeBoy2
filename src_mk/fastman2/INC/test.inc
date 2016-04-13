@@ -49,30 +49,25 @@ ___UPDATE:
 	MOVX A, @DPTR
 	INC A
 	; reset
-	CJNE A, #10, ___cjjp
+	CJNE A, #18, ___cjjp
 		MOV A, #0 
 	___cjjp:
 	MOVX @DPTR, A
 	
-	; draw 1
+	;x
 	MOV R5, A
-	PUSH ACC
+	
+	; draw 1
 	MOV R6, #1
 	MOV DPTR, #DDD_SPRITE_OBJ1
 	ACALL MATRIX_SPRITE8
-	
-	
+		
 	; draw 2
-	POP ACC
-	MOV R5, A
-	PUSH ACC
 	MOV R6, #14
 	MOV DPTR, #DDD_SPRITE_OBJ1+(1*8)
 	ACALL MATRIX_SPRITE8
 	
 	; draw 3
-	POP ACC
-	MOV R5, A
 	MOV R6, #24
 	MOV DPTR, #DDD_SPRITE_OBJ1+(2*8)
 	ACALL MATRIX_SPRITE8

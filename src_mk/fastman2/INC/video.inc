@@ -11,8 +11,8 @@
 ;		VIDEO_DRAW2
 ;
 ;		MATRIX_CLEAR
-;		MATRIX_PIXEL
-;		MATRIX_SPRITE8
+;		MATRIX_PIXEL		{R0 - x; R1 - y}
+;		MATRIX_SPRITE8		{R5 - x; R6 - y; DPTR - addr of sprite (8x8)}
 ;
 ;
 ; ZeLDER
