@@ -284,10 +284,6 @@ MATRIX_PIXEL: ; R0 - x, R1 - y
 ;		DPTR 	- addr of sprite (8x8)
 ;-------------------------------------
 MATRIX_SPRITE8: 
-	; in
-	;MOV R5, #1
-	;MOV R6, #1
-	;MOV DPTR, #DDD_SPRITE_OBJ1
 	PUSH DPH
 	PUSH DPL
 	; read sprite
@@ -330,12 +326,10 @@ MATRIX_SPRITE8:
 			PUSH ACC
 			;		
 			JNC __drw_smbX_f
-			ACALL MATRIX_PIXEL
+			ACALL MATRIX_PIXEL	; R0-x; R1-y
 			__drw_smbX_f:
 			; y++
-			MOV A, R1
-			INC A
-			MOV R1, A
+			INC R1
 			;
 			DJNZ R4, __drw_smbY
 		POP ACC
